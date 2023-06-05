@@ -1,0 +1,40 @@
+{
+  "name": "@junkee/server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format:sql": "find src/infrastructure -type f -name '*.sql' -exec sql-formatter --config sql-formatter.json --fix {} \\;"
+  },
+  "author": "Raphael Pigulla <pigulla@four66.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@nestjs/common": "^9.4.2",
+    "@nestjs/core": "^9.4.2",
+    "@nestjs/event-emitter": "^1.4.1",
+    "@nestjs/platform-express": "^9.4.2",
+    "@nestjs/schedule": "^2.2.2",
+    "@nestjs/swagger": "^6.3.0",
+    "@types/cron": "^2.0.1",
+    "better-sqlite3": "^8.4.0",
+    "config": "^3.3.9",
+    "nestjs-pino": "^3.2.0",
+    "p-limit": "^3.1.0",
+    "p-map": "^3.0.0",
+    "pino-http": "^8.3.3",
+    "pino-pretty": "^10.0.0",
+    "shumway": "^1.0.1",
+    "superagent": "^8.0.9",
+    "uuid": "^9.0.0",
+    "vm2": "^3.9.19"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.4",
+    "@types/express": "^4.17.17",
+    "@types/superagent": "^4.1.18",
+    "@types/tough-cookie": "^4.0.2",
+    "@types/uuid": "^9.0.1",
+    "sql-formatter": "^12.2.1"
+  }
+}
