@@ -1,3 +1,4 @@
+import { type CurrentlyPlayingByChannelID } from '../../application'
 import {
     type Artist,
     type ArtistID,
@@ -77,5 +78,5 @@ export abstract class IETagAwareAudioAddictApi {
     public abstract getCurrentlyPlaying(data: {
         networkKey: NetworkKey
         eTag: ETag | null
-    }): Promise<ETagged<Map<ChannelID, CurrentlyPlayingTrack | null>>>
+    }): Promise<ETagged<CurrentlyPlayingByChannelID>>
 }

@@ -14,6 +14,11 @@ import {
     type TrackID,
 } from '../domain/audio-addict'
 
+export type CurrentlyPlayingByChannelID = Map<
+    ChannelID,
+    CurrentlyPlayingTrack | null
+>
+
 export abstract class IAudioAddictApi {
     public abstract getStreamUrls(data: {
         networkKey: NetworkKey
@@ -48,5 +53,5 @@ export abstract class IAudioAddictApi {
 
     public abstract getCurrentlyPlaying(
         networkKey: NetworkKey,
-    ): Promise<Map<ChannelID, CurrentlyPlayingTrack | null>>
+    ): Promise<CurrentlyPlayingByChannelID>
 }

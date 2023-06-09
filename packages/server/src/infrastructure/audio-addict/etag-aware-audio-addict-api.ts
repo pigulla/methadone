@@ -4,6 +4,7 @@ import { HandleError, HandlerAction } from 'shumway'
 import superagent, { type Response, type SuperAgentStatic } from 'superagent'
 import { type JsonObject, type JsonValue } from 'type-fest'
 
+import { type CurrentlyPlayingByChannelID } from '../../application'
 import {
     type Artist,
     type ArtistID,
@@ -103,7 +104,7 @@ export class ETagAwareAudioAddictApi implements IETagAwareAudioAddictApi {
         this.client = superagent
             .agent()
             .accept('application/json')
-            .retry(1)
+            .retry(3)
             .timeout({ deadline: 5_000 })
         this.logger = logger
     }
@@ -367,7 +368,7 @@ export class ETagAwareAudioAddictApi implements IETagAwareAudioAddictApi {
     }: {
         networkKey: NetworkKey
         eTag: ETag | null
-    }): Promise<ETagged<Map<ChannelID, CurrentlyPlayingTrack | null>>> {
+    }): Promise<ETagged<CurrentlyPlayingByChannelID>> {
         const response = await this.client
             .get(
                 `${ETagAwareAudioAddictApi.BASE_URL}/${encode(

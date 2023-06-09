@@ -2,8 +2,10 @@ import { Injectable, type OnApplicationBootstrap } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Cron } from '@nestjs/schedule'
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino'
+import pLimit from 'p-limit'
 
 import {
+    type Channel,
     type ChannelID,
     type CurrentlyPlayingTrack,
     IArtistRepository,
@@ -11,26 +13,28 @@ import {
     INetworkRepository,
     type IOnAirRepository,
     ITrackRepository,
+    type Network,
 } from '../domain/audio-addict'
 import { type OnAirTrack } from '../domain/audio-addict/on-air-track'
-import { type OnAirTrackChangedEvent } from '../domain/event'
+import { OnAirTrackChangedEvent } from '../domain/event'
 
-import { IAudioAddictApi } from './audio-addict-api.interface'
+import {
+    type CurrentlyPlayingByChannelID,
+    IAudioAddictApi,
+} from './audio-addict-api.interface'
 import { ICurrentTimeProvider } from './current-time-provider.interface'
 
 @Injectable()
 export class OnAirRepository
 implements IOnAirRepository, OnApplicationBootstrap
 {
+    private readonly limit = pLimit(5)
     private readonly audioAddictApi: IAudioAddictApi
     private readonly networkRepository: INetworkRepository
     private readonly channelRepository: IChannelRepository
     private readonly trackRepository: ITrackRepository
     private readonly artistRepository: IArtistRepository
-    private readonly currentlyPlaying: Map<
-        ChannelID,
-        CurrentlyPlayingTrack | null
-    >
+    private readonly currentlyPlaying: CurrentlyPlayingByChannelID
     private readonly eventEmitter: EventEmitter2
     private readonly currentTimeProvider: ICurrentTimeProvider
     private readonly logger: PinoLogger
@@ -60,56 +64,67 @@ implements IOnAirRepository, OnApplicationBootstrap
         return null
     }
 
+    private async getCurrentlyPlayingOnNetwork(
+        network: Network,
+    ): Promise<CurrentlyPlayingByChannelID> {
+        this.logger.trace(
+            `Loading currently playing tracks for network '${network.key}'`,
+        )
+
+        const result = await this.audioAddictApi.getCurrentlyPlaying(
+            network.key,
+        )
+        this.logger.info(
+            `Loaded currently playing tracks for network '${network.key}`,
+        )
+
+        return result
+    }
+
+    private setNewNowPlaying(
+        channel: Channel,
+        next: CurrentlyPlayingTrack | null,
+    ): void {
+        const current = this.currentlyPlaying.get(channel.id)
+
+        if (
+            (current === null && next !== null) ||
+            (current !== null && next === null) ||
+            !current?.equals(next)
+        ) {
+            this.logger.warn(
+                `Channel ${channel.id} changed from ${
+                    current ? current.id : '<none>'
+                } to ${next ? next.id : '<none>'}`,
+            )
+            this.currentlyPlaying.set(channel.id, next)
+            this.eventEmitter.emit(
+                OnAirTrackChangedEvent.name,
+                new OnAirTrackChangedEvent({
+                    track: next,
+                    channel,
+                }),
+            )
+        }
+    }
+
     @Cron('0/15 * * * * *')
     public async update(): Promise<void> {
-        this.logger.info('Updating')
-
-        const result = await Promise.all(
+        this.logger.info('Updating currently playing tracks')
+        const byNetwork = await Promise.all(
             this.networkRepository
                 .getNetworks()
                 .map(network =>
-                    this.audioAddictApi.getCurrentlyPlaying(network.key),
+                    this.limit(() =>
+                        this.getCurrentlyPlayingOnNetwork(network),
+                    ),
                 ),
         )
 
-        for (const nowPlaying of result) {
-            for (const [channelId, currentTrack] of nowPlaying.entries()) {
-                const previousTrack = this.currentlyPlaying.get(channelId)
+        for (const byChannelId of byNetwork) {
+            for (const [channelId, currentlyPlaying] of byChannelId) {
                 const channel = this.channelRepository.getChannel(channelId)
-
-                if (
-                    (previousTrack === null && currentTrack === null) ||
-                    previousTrack?.equals(currentTrack)
-                ) {
-                    continue
-                }
-
-                if (currentTrack) {
-                    const track = this.trackRepository.findTrack(
-                        currentTrack.id,
-                    )
-
-                    if (!track) {
-                        const x = await this.audioAddictApi.getTrack(
-                            currentTrack.id,
-                        )
-
-                        const artist = this.artistRepository.findArtist(
-                            x.artistId,
-                        )
-
-                        if (!artist) {
-                            const a = await this.audioAddictApi.getArtist(
-                                x.artistId,
-                            )
-                            this.artistRepository.insertArtist(a)
-                        }
-
-                        this.trackRepository.insertTrack(x)
-                    }
-                }
-
-                this.currentlyPlaying.set(channel.id, currentTrack)
+                this.setNewNowPlaying(channel, currentlyPlaying)
             }
         }
     }
