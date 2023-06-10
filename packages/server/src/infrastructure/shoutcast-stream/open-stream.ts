@@ -9,18 +9,18 @@ export type StreamOptions = {
     host: string
     port: number
     path: string
-    onTrackChange: (title: string) => void
+    onTrackChange: (track: string) => void
 }
 
-export type StopFn = () => Promise<void>
+export type CloseFn = () => Promise<void>
 
-export function openStream({
+export function openShoutcastStream({
     host,
     port,
     path,
     onTrackChange,
     logger,
-}: StreamOptions): StopFn {
+}: StreamOptions): CloseFn {
     const socket = connect(port, host, () => {
         logger.trace('Socket connected')
 
@@ -30,8 +30,7 @@ export function openStream({
             [`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\n'),
         )
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        processStream(socket, onTrackChange)
+        void processStream(socket, onTrackChange)
     })
 
     return () =>
