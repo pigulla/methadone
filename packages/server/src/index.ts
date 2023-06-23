@@ -19,17 +19,15 @@ import {
     IAudioAddictApi,
     StreamUrlService,
     IStreamUrlService,
-    VlcServerConfig,
     ICurrentTimeProvider,
 } from './application'
+import { VlcServerConfig } from './application/config'
 import { DataLoader } from './application/data-loader'
-import { OnAirRepository } from './application/on-air-repository'
 import {
     IArtistRepository,
     IChannelFilterRepository,
     IChannelRepository,
     INetworkRepository,
-    IOnAirRepository,
     ITrackRepository,
     type ListenKey,
 } from './domain/audio-addict'
@@ -39,7 +37,7 @@ import {
     ChannelFilterController,
     NetworkController,
     NotFoundExceptionFilter,
-    OnAirController,
+    TestController,
 } from './handler/http'
 import { CurrentTimeProvider } from './infrastructure'
 import {
@@ -57,6 +55,7 @@ import {
     TrackRepository,
 } from './infrastructure/persistence'
 import { VlcHttpRemote } from './infrastructure/vlc'
+import { ConfigModule } from './module'
 
 const level = process.env.LOG_LEVEL || 'info'
 
@@ -74,12 +73,13 @@ const level = process.env.LOG_LEVEL || 'info'
         }),
         ScheduleModule.forRoot(),
         EventEmitterModule.forRoot(),
+        ConfigModule,
     ],
     controllers: [
         ChannelController,
         ChannelFilterController,
         NetworkController,
-        OnAirController,
+        TestController,
     ],
     providers: [
         DataLoader,
@@ -124,10 +124,6 @@ const level = process.env.LOG_LEVEL || 'info'
             useClass: ChannelFilterRepository,
         },
         {
-            provide: IOnAirRepository,
-            useClass: OnAirRepository,
-        },
-        {
             provide: IStreamUrlService,
             inject: [IAudioAddictApi, INetworkRepository, IChannelRepository],
             useFactory(
@@ -142,15 +138,6 @@ const level = process.env.LOG_LEVEL || 'info'
                     channelRepository,
                 )
             },
-        },
-        {
-            provide: VlcServerConfig,
-            useValue: new VlcServerConfig({
-                url: 'http://localhost:12345',
-                username: '',
-                password: 'w00t',
-                timeout: dayjs.duration(1, 'second'),
-            }),
         },
         {
             provide: IVlcRemote,

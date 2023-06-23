@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import superagent, { type SuperAgentStatic } from 'superagent'
 import { type JsonObject } from 'type-fest'
 
-import { VlcServerConfig } from '../../application'
+import { VlcServerConfig } from '../../application/config'
 import {
     type IVlcRemote,
     PlayerState,
@@ -32,7 +32,11 @@ export class VlcHttpRemote implements IVlcRemote {
         parameters?: Record<string, string | number>,
     ): Promise<PlayerStatus> {
         const response = await this.client
-            .get(`${this.config.url}/requests/status.json`)
+            .get(
+                `http${this.config.useSSL ? 's' : ''}://${
+                    this.config.hostname
+                }:${this.config.port}/requests/status.json`,
+            )
             .query({
                 command,
                 ...parameters,
