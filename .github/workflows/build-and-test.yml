@@ -1,0 +1,20 @@
+name: Build and Test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 24
+
+      - run: npm ci
+      - run: npm i --no-save @biomejs/cli-linux-x64 @swc/core @rollup/rollup-linux-x64-gnu
+      - run: npm test
+      - run: npm run build
+      - run: npm run openapi

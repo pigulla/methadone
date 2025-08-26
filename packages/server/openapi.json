@@ -1,0 +1,643 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/networks": {
+            "get": {
+                "description": "Get all networks.",
+                "operationId": "NetworkController_getAll",
+                "parameters": [],
+                "responses": {
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    },
+                    "default": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/NetworkDTO_Output"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get all networks.",
+                "tags": [
+                    "network"
+                ]
+            }
+        },
+        "/networks/{networkKey}": {
+            "get": {
+                "description": "Get the network with the given key, if it exists.",
+                "operationId": "NetworkController_getOne",
+                "parameters": [
+                    {
+                        "name": "networkKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "di",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NetworkDTO"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "The network with the given key was not found."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get a network by key.",
+                "tags": [
+                    "network"
+                ]
+            }
+        },
+        "/networks/{networkKey}/channels": {
+            "get": {
+                "description": "Get all channels of the network with the given key, if it exists.",
+                "operationId": "NetworkController_getChannelsForNetwork",
+                "parameters": [
+                    {
+                        "name": "networkKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "di",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "The network with the given key was not found."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    },
+                    "default": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChannelDTO_Output"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get all channels of a network.",
+                "tags": [
+                    "network"
+                ]
+            }
+        },
+        "/networks/{networkKey}/channels/{channelKey}": {
+            "get": {
+                "description": "Get the channels with the given key for the given network, if it exists.",
+                "operationId": "NetworkController_getChannelForNetwork",
+                "parameters": [
+                    {
+                        "name": "channelKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "trance",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "networkKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "di",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "The network or channel with the given key was not found."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    },
+                    "default": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChannelDTO_Output"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get the channel with the given key.",
+                "tags": [
+                    "network"
+                ]
+            }
+        },
+        "/networks/{networkKey}/channel-filters": {
+            "get": {
+                "description": "Get all channel filters of the network with the given key, if it exists.",
+                "operationId": "NetworkController_getChannelFiltersForNetwork",
+                "parameters": [
+                    {
+                        "name": "networkKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "di",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "The network with the given key was not found."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    },
+                    "default": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChannelFilterDTO_Output"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get all channel filters of a network.",
+                "tags": [
+                    "network"
+                ]
+            }
+        },
+        "/networks/{networkKey}/channel-filters/{channelFilterKey}": {
+            "get": {
+                "description": "Get the channel filters with the given key for the given network, if it exists.",
+                "operationId": "NetworkController_getChannelFilterForNetwork",
+                "parameters": [
+                    {
+                        "name": "channelFilterKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "popular",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "networkKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "di",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "The network or channel filter with the given key was not found."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    },
+                    "default": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChannelFilterDTO_Output"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get the channel filters with the given key.",
+                "tags": [
+                    "network"
+                ]
+            }
+        },
+        "/stream": {
+            "delete": {
+                "description": "Stop playback of the current stream (if any). Note that a client may continue playing until its local buffer is empty.",
+                "operationId": "StreamController_stop",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Stop playback.",
+                "tags": [
+                    "stream"
+                ]
+            },
+            "get": {
+                "description": "Get the track currently being streamed (if any).",
+                "operationId": "StreamController_nowPlaying",
+                "parameters": [],
+                "responses": {
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "No channel is currently being streamed."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    },
+                    "default": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NowPlayingDTO_Output"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Get track being streamed.",
+                "tags": [
+                    "stream"
+                ]
+            }
+        },
+        "/stream/{networkKey}/{channelKey}": {
+            "get": {
+                "description": "Start playback of the channel of the given network with the given key, if it exists. The stream is the raw audio without any IceCast metadata. Any previously started stream is terminated.",
+                "operationId": "StreamController_play",
+                "parameters": [
+                    {
+                        "name": "channelKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "trance",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "networkKey",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": "di",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The operation completed successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "A query or route parameter, the payload or a header was malformed and did not pass validation."
+                    },
+                    "404": {
+                        "description": "The channel with the given key was not found."
+                    },
+                    "500": {
+                        "description": "An unexpected error occurred."
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "summary": "Start streaming a channel.",
+                "tags": [
+                    "stream"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "My API",
+        "description": "This is my API.",
+        "version": "1.0",
+        "contact": {
+            "name": "Raphael Pigulla",
+            "url": "https://de.linkedin.com/in/pigulla",
+            "email": "raphael@pigulla.net"
+        },
+        "license": {
+            "name": "ISC",
+            "url": "https://spdx.org/licenses/ISC"
+        }
+    },
+    "tags": [],
+    "servers": [
+        {
+            "url": "http://localhost.com:3000"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "NetworkDTO_Output": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                    },
+                    "key": {
+                        "type": "string",
+                        "pattern": "^[a-z_0-9]+$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "id",
+                    "key",
+                    "name",
+                    "url"
+                ]
+            },
+            "NetworkDTO": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                    },
+                    "key": {
+                        "type": "string",
+                        "pattern": "^[a-z_0-9]+$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "id",
+                    "key",
+                    "name",
+                    "url"
+                ]
+            },
+            "ChannelDTO_Output": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                    },
+                    "key": {
+                        "type": "string",
+                        "pattern": "^[a-z_0-9]+$"
+                    },
+                    "networkId": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "director": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "key",
+                    "networkId",
+                    "name",
+                    "director",
+                    "description"
+                ]
+            },
+            "ChannelFilterDTO_Output": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                    },
+                    "key": {
+                        "type": "string",
+                        "pattern": "^[a-z_0-9]+$"
+                    },
+                    "networkId": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "position": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "key",
+                    "networkId",
+                    "name",
+                    "position",
+                    "channels"
+                ]
+            },
+            "NowPlayingDTO_Output": {
+                "type": "object",
+                "properties": {
+                    "track": {
+                        "type": "string"
+                    },
+                    "network": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                            },
+                            "key": {
+                                "type": "string",
+                                "pattern": "^[a-z_0-9]+$"
+                            },
+                            "name": {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "url": {
+                                "type": "string",
+                                "format": "uri"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "key",
+                            "name",
+                            "url"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "channel": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                            },
+                            "key": {
+                                "type": "string",
+                                "pattern": "^[a-z_0-9]+$"
+                            },
+                            "networkId": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                            },
+                            "name": {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "director": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "key",
+                            "networkId",
+                            "name",
+                            "director",
+                            "description"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "track",
+                    "network",
+                    "channel"
+                ]
+            }
+        }
+    }
+}
