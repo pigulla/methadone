@@ -1,5 +1,9 @@
+import { Readable } from 'node:stream'
+
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
-import { type Got, got } from 'got'
+import { type Got, got, Response } from 'got'
+import Options from 'got/dist/source/core/options.js'
+import ResponseLike from 'responselike'
 import type { JsonValue } from 'type-fest'
 
 import { Channel, type ChannelID } from '#domain/channel/channel.js'
@@ -25,25 +29,51 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     this.cache = cache
     this.http = got.extend({
       prefixUrl: config.baseUrl,
+      hooks: config.useCache
+        ? {
+            beforeRequest: [
+              async (options: Options): Promise<void> => {
+                const cacheKey = options.context.cacheKey as string
+                const cached = await this.cache.get(cacheKey)
+
+                if (cached) {
+                  options.headers['if-none-match'] = cached.etag
+                }
+              },
+            ],
+            afterResponse: [
+              async (response: Response): Promise<Response> => {
+                const cacheKey = response.request.options.context.cacheKey as string
+                const cached = await this.cache.get(cacheKey)
+
+                if (response.statusCode === HttpStatus.NOT_MODIFIED && cached) {
+                  const rawBody = Buffer.from(JSON.stringify(cached.value))
+                  const cachedResponse = new ResponseLike({
+                    statusCode: HttpStatus.OK,
+                    url: response.url,
+                    headers: { 'content-type': 'application/json' },
+                    body: rawBody,
+                  }) as Response
+
+                  cachedResponse.request = response.request
+                  cachedResponse.rawBody = rawBody
+
+                  return cachedResponse
+                }
+
+                if (response.headers.etag) {
+                  await this.cache.set(cacheKey, {
+                    etag: response.headers.etag,
+                    value: JSON.parse(response.body as string) as JsonValue,
+                  })
+                }
+
+                return response
+              },
+            ],
+          }
+        : {},
     })
-  }
-
-  private async getCached({ key, path }: { key: string; path: string }): Promise<JsonValue> {
-    const cached = await this.cache.get(key)
-    const response = await this.http.get<JsonValue>(path, {
-      headers: cached ? { 'if-none-match': cached.etag } : {},
-      responseType: 'json',
-    })
-
-    if (response.statusCode === HttpStatus.NOT_MODIFIED && cached) {
-      return cached.value
-    }
-
-    if (response.headers.etag) {
-      await this.cache.set(key, { etag: response.headers.etag, value: response.body })
-    }
-
-    return response.body
   }
 
   public async getCurrentlyPlaying(
@@ -52,10 +82,13 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
     // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
     // using the key.
-    const value = await this.getCached({
-      key: `currently-playing.${key}`,
-      path: `v1/${key}/currently_playing`,
-    })
+    const value = await this.http
+      .get(`v1/${key}/currently_playing`, {
+        context: {
+          cacheKey: `${key}.currently-playing`,
+        },
+      })
+      .json()
 
     return new Map(
       currentlyPlayingDtoSchema.parse(value).map(
@@ -76,10 +109,16 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getNetworks(): Promise<Network[]> {
-    const value = await this.getCached({ key: 'networks', path: 'v1/networks' })
+    const data = await this.http
+      .get('v1/networks', {
+        context: {
+          cacheKey: 'networks',
+        },
+      })
+      .json()
 
     return networksDtoSchema
-      .parse(value)
+      .parse(data)
       .filter(network => network.active)
       .map(({ id, key, name, url }) =>
         Network.create({
@@ -95,7 +134,13 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
     // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
     // using the key.
-    const value = await this.getCached({ key: `channels.${key}`, path: `v1/${key}/channels` })
+    const value = await this.http
+      .get(`v1/${key}/channels`, {
+        context: {
+          cacheKey: `${key}.channels`,
+        },
+      })
+      .json()
 
     return channelsDtoSchema
       .parse(value)
@@ -116,10 +161,13 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
     // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
     // using the key.
-    const value = await this.getCached({
-      key: `channels-filters.${key}`,
-      path: `v1/${key}/channel_filters`,
-    })
+    const value = await this.http
+      .get(`v1/${key}/channel_filters`, {
+        context: {
+          cacheKey: `${key}.channels-filters`,
+        },
+      })
+      .json()
 
     return channelFiltersDtoSchema
       .parse(value)
