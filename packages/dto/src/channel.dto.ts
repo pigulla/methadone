@@ -13,4 +13,15 @@ export const channelDtoSchema = z.strictObject({
   description: z.string(),
 })
 
+export function createChannelDTO(data: {
+  id: number
+  key: string
+  networkId: number
+  name: string
+  director: string
+  description: string
+}): z.infer<typeof channelDtoSchema> {
+  return channelDtoSchema.parse(data)
+}
+
 export class ChannelDTO extends createZodDto(channelDtoSchema) {}

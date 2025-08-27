@@ -37,6 +37,6 @@
     },
     "dependencies": {
         "nestjs-zod": "5.0.0",
-        "zod": "4.1.0"
+        "zod": "4.1.3"
     }
 }

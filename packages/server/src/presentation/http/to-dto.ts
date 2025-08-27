@@ -1,10 +1,19 @@
 import { ChannelDTO, channelDtoSchema } from '@methadone/dto/channel.dto.js'
 import { ChannelFilterDTO, channelFilterDtoSchema } from '@methadone/dto/channel-filter.dto.js'
 import { NetworkDTO, networkDtoSchema } from '@methadone/dto/network.dto.js'
+import { type TrackDTO, trackDtoSchema } from '@methadone/dto/track.dto.js'
 
 import type { Channel } from '#domain/channel/channel.js'
 import type { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import type { Network } from '#domain/network/network.js'
+import type { Track } from '#domain/track/track.js'
+
+export function trackToDTO(track: Track): TrackDTO {
+  return trackDtoSchema.parse({
+    title: track.title,
+    artist: track.artist,
+  })
+}
 
 export function channelToDTO(channel: Channel): ChannelDTO {
   return channelDtoSchema.parse({

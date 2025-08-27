@@ -13,13 +13,13 @@ import { networksRow } from './sql/networks.row.js'
 
 @Injectable()
 export class NetworkRepository
-  extends AbstractRepository<['get-one', 'get-one-by-key', 'get-one-by-key', 'get-all', 'insert']>
+  extends AbstractRepository<['get-one', 'get-one-by-key', 'get-all', 'insert']>
   implements INetworkRepository, OnModuleInit
 {
   public constructor(database: IDatabase) {
     super(database, {
       directory: join(import.meta.dirname, 'sql'),
-      fileNames: ['get-one', 'get-one-by-key', 'get-one-by-key', 'get-all', 'insert'],
+      fileNames: ['get-one', 'get-one-by-key', 'get-all', 'insert'],
     })
   }
 

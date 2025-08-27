@@ -1,6 +1,7 @@
 import { ChannelDTO } from '@methadone/dto/channel.dto.js'
 import { ChannelFilterDTO } from '@methadone/dto/channel-filter.dto.js'
 import { NetworkDTO } from '@methadone/dto/network.dto.js'
+import { TrackDTO } from '@methadone/dto/track.dto.js'
 
 import { Controller, Get, HttpStatus, Param } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
@@ -16,7 +17,7 @@ import { channelFilterKeySchema } from '#domain/channel-filter/channel-filter.sc
 import type { NetworkKey } from '#domain/network/network.js'
 import { networkKeySchema } from '#domain/network/network.schema.js'
 
-import { channelFilterToDTO, channelToDTO, networkToDTO } from './to-dto.js'
+import { channelFilterToDTO, channelToDTO, networkToDTO, trackToDTO } from './to-dto.js'
 
 @Controller('networks')
 @ApiTags('network')
@@ -101,7 +102,7 @@ export class NetworkController {
   @ApiParam({ name: 'channelKey', type: 'string', example: 'trance' })
   @ApiOperation({
     summary: 'Get the channel with the given key.',
-    description: 'Get the channels with the given key for the given network, if it exists.',
+    description: 'Get the channels with the given key for the given network.',
   })
   @ZodResponse({ description: 'The operation completed successfully.', type: ChannelDTO })
   @ApiResponse({
@@ -115,6 +116,28 @@ export class NetworkController {
   ) {
     const channel = await this.channelService.get(networkKey, channelKey)
     return channelToDTO(channel)
+  }
+
+  @Get(':networkKey/channels/:channelKey/on-air')
+  @ApiParam({ name: 'networkKey', type: 'string', example: 'di' })
+  @ApiParam({ name: 'channelKey', type: 'string', example: 'trance' })
+  @ApiOperation({
+    summary: 'Get the track currently playing on the channel with the given key.',
+    description:
+      'Get the track currently playing  on the channel with the given key for the given network.',
+  })
+  @ZodResponse({ description: 'The operation completed successfully.', type: TrackDTO })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'The network or channel with the given key was not found.',
+  })
+  public async getNowPlaying(
+    @Param('networkKey', new ZodValidationPipe(networkKeySchema)) networkKey: NetworkKey,
+    @Param('channelKey', new ZodValidationPipe(channelKeySchema))
+    channelKey: ChannelKey,
+  ) {
+    const track = await this.channelService.getCurrentlyPlaying(networkKey, channelKey)
+    return trackToDTO(track)
   }
 
   @Get(':networkKey/channel-filters')

@@ -1,0 +1,1 @@
+TRUNCATE TABLE currently_playing;

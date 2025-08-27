@@ -1,10 +1,10 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common'
 
-import { Channel, type ChannelID } from '#domain/channel/channel.js'
+import { Channel } from '#domain/channel/channel.js'
 import { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { IChannelFilterRepository } from '#domain/channel-filter/channel-filter.repository.interface.js'
-import { Network, type NetworkID } from '#domain/network/network.js'
+import { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 
 import { IAudioAddictAPI } from './api/audio-addict-api.interface.js'

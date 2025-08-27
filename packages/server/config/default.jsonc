@@ -31,7 +31,9 @@
     "audioAddict": {
         "baseUrl": "https://api.audioaddict.com",
         "listeningKey": "",
-        "format": "mp3-320"
+        "format": "mp3-320",
+        "useCache": true,
+        "currentlyPlayingRefreshIntervalInSeconds": 15
     },
     "externalPlayer": {
         "path": "",

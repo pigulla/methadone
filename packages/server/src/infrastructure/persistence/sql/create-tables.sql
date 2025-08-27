@@ -35,4 +35,12 @@ CREATE TABLE channels_to_channel_filters (
   channel_id UINTEGER REFERENCES channels (id) NOT NULL,
   channel_filter_id UINTEGER REFERENCES channel_filters (id) NOT NULL,
   PRIMARY KEY (channel_id, channel_filter_id),
-)
+);
+
+CREATE TABLE currently_playing (
+  channel_id UINTEGER REFERENCES channels (id) PRIMARY KEY NOT NULL,
+  artist VARCHAR NOT NULL,
+  title VARCHAR NOT NULL,
+  started_at TIMESTAMPTZ NOT NULL,
+  duration INTERVAL NOT NULL
+);

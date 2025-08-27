@@ -1,4 +1,7 @@
-import { NowPlayingDTO, nowPlayingDtoSchema } from '@methadone/dto/now-playing.dto.js'
+import {
+  CurrentlyPlayingDto,
+  createCurrentlyPlayingDTO,
+} from '@methadone/dto/currently-playing.dto.js'
 
 import {
   Controller,
@@ -73,36 +76,19 @@ export class StreamController {
     summary: 'Get track being streamed.',
     description: 'Get the track currently being streamed (if any).',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: NowPlayingDTO })
+  @ZodResponse({ description: 'The operation completed successfully.', type: CurrentlyPlayingDto })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'No channel is currently being streamed.',
   })
-  public nowPlaying() {
+  public onAir() {
     const nowPlaying = this.streamProvider.getNowPlaying()
 
     if (!nowPlaying) {
       throw new NotFoundException('No channel is currently being streamed')
     }
 
-    // TODO: Find a better way to do this.
-    return nowPlayingDtoSchema.parse({
-      track: nowPlaying.track,
-      network: {
-        id: nowPlaying.network.id,
-        key: nowPlaying.network.key,
-        name: nowPlaying.network.name,
-        url: nowPlaying.network.url,
-      },
-      channel: {
-        id: nowPlaying.channel.id,
-        key: nowPlaying.channel.key,
-        networkId: nowPlaying.channel.networkId,
-        name: nowPlaying.channel.name,
-        director: nowPlaying.channel.director,
-        description: nowPlaying.channel.description,
-      },
-    })
+    return createCurrentlyPlayingDTO(nowPlaying)
   }
 
   @Get(':networkKey/:channelKey')
