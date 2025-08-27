@@ -1,21 +1,35 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
-import { channelDtoSchema, createChannelDTO } from './channel.dto.js'
-import { createNetworkDTO, networkDtoSchema } from './network.dto.js'
-
 export const currentlyPlayingDtoSchema = z.strictObject({
-  track: z.string(),
-  network: networkDtoSchema,
-  channel: channelDtoSchema,
+  track: z
+    .strictObject({
+      artist: z.string(),
+      title: z.string(),
+      startedAt: z.iso.datetime(),
+      duration: z.number().int().min(0),
+    })
+    .nullable(),
 })
 
-export function createCurrentlyPlayingDTO(data: {
-  track: string
-  network: Parameters<typeof createNetworkDTO>[0]
-  channel: Parameters<typeof createChannelDTO>[0]
-}): z.infer<typeof currentlyPlayingDtoSchema> {
-  return currentlyPlayingDtoSchema.parse(data)
-}
+export class CurrentlyPlayingDTO extends createZodDto(currentlyPlayingDtoSchema) {}
 
-export class CurrentlyPlayingDto extends createZodDto(currentlyPlayingDtoSchema) {}
+export function createCurrentlyPlayingDTO(
+  data: {
+    artist: string
+    title: string
+    startedAt: string
+    duration: number
+  } | null,
+): CurrentlyPlayingDTO {
+  return CurrentlyPlayingDTO.create({
+    track: data
+      ? {
+          artist: data.artist,
+          title: data.title,
+          startedAt: data.startedAt,
+          duration: data.duration,
+        }
+      : null,
+  })
+}

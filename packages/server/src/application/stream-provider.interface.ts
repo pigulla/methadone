@@ -5,7 +5,7 @@ import type { Network } from '#domain/network/network.js'
 
 export abstract class IStreamProvider {
   public abstract stop(): void
-  public abstract getNowPlaying(): {
+  public abstract getInformation(): {
     track: string
     channel: Channel
     network: Network

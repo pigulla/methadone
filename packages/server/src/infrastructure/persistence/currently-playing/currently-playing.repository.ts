@@ -1,11 +1,12 @@
 import { join } from 'node:path'
 
-import { intervalValue, timestampTZValue } from '@duckdb/node-api'
+import { intervalValue, TIMESTAMPTZ, timestampTZValue, UINTEGER, VARCHAR } from '@duckdb/node-api'
+import { INTERVAL, SQLNULL } from '@duckdb/node-api/lib/DuckDBType.js'
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 
 import type { ChannelID } from '#domain/channel/channel.js'
 import { ChannelNotFoundError } from '#domain/channel/channel-not-found.error.js'
-import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
+import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import type { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import type { NetworkID } from '#domain/network/network.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
@@ -31,7 +32,7 @@ export class CurrentlyPlayingRepository
     await this.stmt.DELETE_ALL.run()
   }
 
-  public async get(id: ChannelID): Promise<CurrentlyPlaying> {
+  public async get(id: ChannelID): Promise<CurrentlyPlaying | null> {
     const stmt = this.stmt.GET_ONE
 
     stmt.bind({ channel_id: id })
@@ -44,7 +45,7 @@ export class CurrentlyPlayingRepository
     return currentlyPlayingRow.parse(rows[0]).toDomain()
   }
 
-  public async getForNetwork(id: NetworkID): Promise<Map<ChannelID, CurrentlyPlaying>> {
+  public async getForNetwork(id: NetworkID): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
     const stmt = this.stmt.GET_ALL_FOR_NETWORK
 
     stmt.bind({ network_id: id })
@@ -57,49 +58,65 @@ export class CurrentlyPlayingRepository
 
     return new Map(
       rows
-        .map(row => currentlyPlayingRow.parse(row).toDomain())
-        .map(value => [value.channelId, value] as const),
+        .map(row => currentlyPlayingRow.parse(row))
+        .map(value => [value.channel_id, value.toDomain()] as const),
     )
   }
 
-  public async getAll(): Promise<Map<ChannelID, CurrentlyPlaying>> {
+  public async getAll(): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
     const stmt = this.stmt.GET_ALL
 
     const rows = (await stmt.runAndReadAll()).getRowObjects()
 
     return new Map(
       rows
-        .map(row => currentlyPlayingRow.parse(row).toDomain())
-        .map(value => [value.channelId, value] as const),
+        .map(row => currentlyPlayingRow.parse(row))
+        .map(value => [value.channel_id, value.toDomain()] as const),
     )
   }
 
-  public async upsert(nowPlaying: CurrentlyPlaying): Promise<void> {
+  public async upsert(
+    channelId: ChannelID,
+    currentlyPlaying: CurrentlyPlaying | null,
+  ): Promise<void> {
     const stmt = this.stmt.UPSERT
 
-    stmt.bind({
-      channel_id: nowPlaying.channelId,
-      artist: nowPlaying.artist,
-      title: nowPlaying.title,
-      started_at: timestampTZValue({
-        date: {
-          year: nowPlaying.startedAt.year(),
-          month: nowPlaying.startedAt.month(),
-          day: nowPlaying.startedAt.day(),
-        },
-        time: {
-          hour: nowPlaying.startedAt.hour(),
-          min: nowPlaying.startedAt.minute(),
-          sec: nowPlaying.startedAt.second(),
-          micros: 0,
-        },
-      }),
-      duration: intervalValue(
-        0,
-        0,
-        BigInt(nowPlaying.duration.asMilliseconds().toFixed(0)) * 1000n,
-      ),
-    })
+    stmt.bind(
+      {
+        channel_id: channelId,
+        artist: currentlyPlaying ? currentlyPlaying.artist : null,
+        title: currentlyPlaying ? currentlyPlaying.title : null,
+        started_at: currentlyPlaying
+          ? timestampTZValue({
+              date: {
+                year: currentlyPlaying.startedAt.year(),
+                month: currentlyPlaying.startedAt.month(),
+                day: currentlyPlaying.startedAt.day(),
+              },
+              time: {
+                hour: currentlyPlaying.startedAt.hour(),
+                min: currentlyPlaying.startedAt.minute(),
+                sec: currentlyPlaying.startedAt.second(),
+                micros: 0,
+              },
+            })
+          : null,
+        duration: currentlyPlaying
+          ? intervalValue(
+              0,
+              0,
+              BigInt(currentlyPlaying.duration.asMilliseconds().toFixed(0)) * 1000n,
+            )
+          : null,
+      },
+      {
+        channel_id: UINTEGER,
+        artist: currentlyPlaying ? VARCHAR : SQLNULL,
+        title: currentlyPlaying ? VARCHAR : SQLNULL,
+        started_at: currentlyPlaying ? TIMESTAMPTZ : SQLNULL,
+        duration: currentlyPlaying ? INTERVAL : SQLNULL,
+      },
+    )
 
     await stmt.run()
   }

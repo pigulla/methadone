@@ -11,13 +11,18 @@ export const networkDtoSchema = z.strictObject({
   url: z.httpUrl(),
 })
 
-export function createNetworkDTO(data: {
+export class NetworkDTO extends createZodDto(networkDtoSchema) {}
+
+export function createNetworkDTO({
+  id,
+  key,
+  name,
+  url,
+}: {
   id: number
   key: string
   name: string
   url: string
-}): z.infer<typeof networkDtoSchema> {
-  return networkDtoSchema.parse(data)
+}): NetworkDTO {
+  return NetworkDTO.create({ id, key, name, url })
 }
-
-export class NetworkDTO extends createZodDto(networkDtoSchema) {}

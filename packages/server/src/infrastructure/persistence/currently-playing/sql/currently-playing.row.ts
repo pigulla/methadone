@@ -1,3 +1,5 @@
+import { DuckDBIntervalValue } from '@duckdb/node-api/lib/values/DuckDBIntervalValue.js'
+import { DuckDBTimestampTZValue } from '@duckdb/node-api/lib/values/DuckDBTimestampTZValue.js'
 import dayjs from 'dayjs'
 import z from 'zod'
 
@@ -5,26 +7,47 @@ import { channelIdSchema } from '#domain/channel/channel.schema.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 
 export const currentlyPlayingRow = z
-  .strictObject({
-    channel_id: channelIdSchema,
-    artist: z.string(),
-    title: z.httpUrl(),
-    started_at: z.string(),
-    duration: z.number(),
-  })
+  .union([
+    z.strictObject({
+      channel_id: channelIdSchema,
+      artist: z.string(),
+      title: z.string(),
+      started_at: z
+        .instanceof(DuckDBTimestampTZValue)
+        .transform(value => {
+          const { date, time } = value.toParts()
+          return dayjs({
+            ...date,
+            hour: time.hour,
+            minute: time.min,
+            second: time.sec,
+          })
+        })
+        .refine(value => value.isValid()),
+      duration: z
+        .instanceof(DuckDBIntervalValue)
+        .transform(value => dayjs.duration(Number(value.micros / 1000000n), 'seconds')),
+    }),
+    z.strictObject({
+      channel_id: channelIdSchema,
+      artist: z.null(),
+      title: z.null(),
+      started_at: z.null(),
+      duration: z.null(),
+    }),
+  ])
   .transform(data => ({
     ...data,
     toDomain: () => {
-      const { channel_id, started_at, duration, ...other } = data
-      return new CurrentlyPlaying({
-        ...other,
-        channelId: channel_id,
-        startedAt: dayjs(started_at),
-        duration: dayjs.duration(duration, 'seconds'),
-      })
+      const { channel_id: _, started_at, ...other } = data
+      return other.artist === null
+        ? null
+        : new CurrentlyPlaying({
+            ...other,
+            startedAt: started_at!,
+            duration: other.duration!,
+          })
     },
   }))
   .readonly()
   .brand('currently-playing-row')
-
-export type NetworksRow = z.infer<typeof currentlyPlayingRow>

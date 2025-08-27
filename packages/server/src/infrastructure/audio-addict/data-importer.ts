@@ -1,4 +1,5 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common'
+import dayjs from 'dayjs'
 
 import { Channel } from '#domain/channel/channel.js'
 import { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
@@ -30,9 +31,12 @@ export class DataImporter implements OnModuleInit {
   }
 
   public async onModuleInit(): Promise<void> {
+    const start = dayjs()
     const networks = await this.loadNetworks()
     await this.loadChannels(networks)
     await this.loadChannelFilters(networks)
+    const seconds = start.diff(dayjs(), 'seconds')
+    this.logger.log(`Successfully imported AudioAddict data (took ${seconds.toFixed(1)} seconds)`)
   }
 
   private async loadNetworks(): Promise<Network[]> {
@@ -59,7 +63,7 @@ export class DataImporter implements OnModuleInit {
     const channelsByNetwork: ReadonlyMap<Network, Channel[]> = new Map(
       await Promise.all(
         networks.map(
-          async network => [network, await this.audioAddictApi.getChannels(network.id)] as const,
+          async network => [network, await this.audioAddictApi.getChannels(network.key)] as const,
         ),
       ),
     )
@@ -89,7 +93,7 @@ export class DataImporter implements OnModuleInit {
       await Promise.all(
         networks.map(
           async network =>
-            [network, await this.audioAddictApi.getChannelFilters(network.id)] as const,
+            [network, await this.audioAddictApi.getChannelFilters(network.key)] as const,
         ),
       ),
     )

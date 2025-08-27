@@ -5,4 +5,4 @@ SELECT
   started_at,
   duration
 FROM
-    currently_playing;
+  currently_playing;

@@ -2,10 +2,10 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { type Got, got } from 'got'
 import type { JsonValue } from 'type-fest'
 
-import { Channel } from '#domain/channel/channel.js'
+import { Channel, type ChannelID } from '#domain/channel/channel.js'
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
-import { Network, type NetworkID } from '#domain/network/network.js'
+import { Network, type NetworkKey } from '#domain/network/network.js'
 
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
 
@@ -46,20 +46,32 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     return response.body
   }
 
-  public async getCurrentlyPlaying(id: NetworkID): Promise<CurrentlyPlaying[]> {
+  public async getCurrentlyPlaying(
+    key: NetworkKey,
+  ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
+    // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
+    // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
+    // using the key.
     const value = await this.getCached({
-      key: `currently-playing.${id}`,
-      path: `v1/${id}/currently_playing`,
+      key: `currently-playing.${key}`,
+      path: `v1/${key}/currently_playing`,
     })
 
-    return currentlyPlayingDtoSchema.parse(value).map(({ channel_id, track }) =>
-      CurrentlyPlaying.create({
-        channelId: channel_id,
-        artist: track.display_artist,
-        title: track.display_title,
-        startedAt: track.start_time,
-        duration: [track.duration, 'seconds'],
-      }),
+    return new Map(
+      currentlyPlayingDtoSchema.parse(value).map(
+        ({ channel_id, track }) =>
+          [
+            channel_id,
+            track
+              ? CurrentlyPlaying.create({
+                  artist: track.display_artist,
+                  title: track.display_title,
+                  startedAt: track.start_time,
+                  duration: [track.duration, 'seconds'],
+                })
+              : null,
+          ] as const,
+      ),
     )
   }
 
@@ -79,8 +91,11 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       )
   }
 
-  public async getChannels(id: NetworkID): Promise<Channel[]> {
-    const value = await this.getCached({ key: `channels.${id}`, path: `v1/${id}/channels` })
+  public async getChannels(key: NetworkKey): Promise<Channel[]> {
+    // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
+    // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
+    // using the key.
+    const value = await this.getCached({ key: `channels.${key}`, path: `v1/${key}/channels` })
 
     return channelsDtoSchema
       .parse(value)
@@ -97,10 +112,13 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       )
   }
 
-  public async getChannelFilters(id: NetworkID): Promise<ChannelFilter[]> {
+  public async getChannelFilters(key: NetworkKey): Promise<ChannelFilter[]> {
+    // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
+    // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
+    // using the key.
     const value = await this.getCached({
-      key: `channels-filters.${id}`,
-      path: `v1/${id}/channel_filters`,
+      key: `channels-filters.${key}`,
+      path: `v1/${key}/channel_filters`,
     })
 
     return channelFiltersDtoSchema

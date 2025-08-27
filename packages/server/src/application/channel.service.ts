@@ -28,7 +28,7 @@ export class ChannelService implements IChannelService {
   public async getCurrentlyPlaying(
     networkKey: NetworkKey,
     channelKey: ChannelKey,
-  ): Promise<CurrentlyPlaying> {
+  ): Promise<CurrentlyPlaying | null> {
     const network = await this.networkRepository.getByKey(networkKey)
     const channel = await this.channelRepository.getByKeyForNetwork(network.id, channelKey)
 

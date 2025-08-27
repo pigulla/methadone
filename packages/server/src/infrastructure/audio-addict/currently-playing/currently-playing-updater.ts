@@ -62,18 +62,18 @@ export class CurrentlyPlayingUpdater
   public async update(): Promise<void> {
     this.logger.verbose('Updating "currently playing" data')
     const networks = await this.networkRepository.getAll()
-    const nowPlaying = (
-      await Promise.all(networks.map(network => this.api.getCurrentlyPlaying(network.id)))
+    const currentlyPlayingByNetwork = await Promise.all(
+      networks.map(network => this.api.getCurrentlyPlaying(network.key)),
     )
-      .flat()
-      .filter(value => value.fromCache)
+
+    const currentlyPlaying = currentlyPlayingByNetwork.flatMap(item => [...item.entries()])
 
     await this.nowPlayingRepository.deleteAll()
-    for (const item of nowPlaying) {
-      await this.nowPlayingRepository.upsert(item)
+    for (const [channelId, item] of currentlyPlaying) {
+      await this.nowPlayingRepository.upsert(channelId, item)
     }
     this.logger.log(
-      `Successfully updated "currently playing" data for ${nowPlaying.length} channel(s)`,
+      `Successfully updated "currently playing" data for ${currentlyPlaying.length} channel(s)`,
     )
   }
 }

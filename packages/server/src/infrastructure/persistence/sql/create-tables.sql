@@ -39,8 +39,22 @@ CREATE TABLE channels_to_channel_filters (
 
 CREATE TABLE currently_playing (
   channel_id UINTEGER REFERENCES channels (id) PRIMARY KEY NOT NULL,
-  artist VARCHAR NOT NULL,
-  title VARCHAR NOT NULL,
-  started_at TIMESTAMPTZ NOT NULL,
-  duration INTERVAL NOT NULL
+  artist VARCHAR NULL,
+  title VARCHAR NULL,
+  started_at TIMESTAMPTZ NULL,
+  duration INTERVAL NULL,
+  CHECK (
+    (
+      artist IS NULL
+      AND title IS NULL
+      AND started_at IS NULL
+      AND duration IS NULL
+    )
+    OR (
+      artist IS NOT NULL
+      AND title IS NOT NULL
+      AND started_at IS NOT NULL
+      AND duration IS NOT NULL
+    )
+  )
 );

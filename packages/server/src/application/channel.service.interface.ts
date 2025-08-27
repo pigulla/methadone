@@ -7,6 +7,6 @@ export abstract class IChannelService {
   public abstract getCurrentlyPlaying(
     networkKey: NetworkKey,
     channelKey: ChannelKey,
-  ): Promise<CurrentlyPlaying>
+  ): Promise<CurrentlyPlaying | null>
   public abstract getAllForNetwork(networkKey: NetworkKey): Promise<Channel[]>
 }

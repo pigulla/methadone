@@ -13,15 +13,22 @@ export const channelFilterDtoSchema = z.strictObject({
   channels: z.array(idSchema),
 })
 
-export function createChannelFilterDTO(data: {
+export class ChannelFilterDTO extends createZodDto(channelFilterDtoSchema) {}
+
+export function createChannelFilterDTO({
+  id,
+  key,
+  networkId,
+  name,
+  position,
+  channels,
+}: {
   id: number
   key: string
   networkId: number
   name: string
   position: number
   channels: number[]
-}): z.infer<typeof channelFilterDtoSchema> {
-  return channelFilterDtoSchema.parse(data)
+}): ChannelFilterDTO {
+  return ChannelFilterDTO.create({ id, key, networkId, name, position, channels })
 }
-
-export class ChannelFilterDTO extends createZodDto(channelFilterDtoSchema) {}

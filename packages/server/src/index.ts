@@ -3,6 +3,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 import { SwaggerModule } from '@nestjs/swagger'
 import dayjs from 'dayjs'
 import durationPlugin from 'dayjs/plugin/duration.js'
+import objectSupportPlugin from 'dayjs/plugin/objectSupport.js'
 import { Logger } from 'nestjs-pino'
 
 import { OPEN_API_CONFIG, type OpenApiConfig } from '#infrastructure/config/open-api.config.js'
@@ -12,6 +13,7 @@ import { EntityNotFoundExceptionFilter } from '#presentation/http/entity-not-fou
 import { createOpenAPIDocument } from '#util/create-openapi-document.js'
 
 dayjs.extend(durationPlugin)
+dayjs.extend(objectSupportPlugin)
 
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(MainModule, { bufferLogs: false })

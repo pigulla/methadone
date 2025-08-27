@@ -1,7 +1,10 @@
-import { ChannelDTO } from '@methadone/dto/channel.dto.js'
-import { ChannelFilterDTO } from '@methadone/dto/channel-filter.dto.js'
-import { NetworkDTO } from '@methadone/dto/network.dto.js'
-import { TrackDTO } from '@methadone/dto/track.dto.js'
+import { ChannelDTO, createChannelDTO } from '@methadone/dto/channel.dto.js'
+import { ChannelFilterDTO, createChannelFilterDTO } from '@methadone/dto/channel-filter.dto.js'
+import {
+  CurrentlyPlayingDTO,
+  createCurrentlyPlayingDTO,
+} from '@methadone/dto/currently-playing.dto.js'
+import { createNetworkDTO, NetworkDTO } from '@methadone/dto/network.dto.js'
 
 import { Controller, Get, HttpStatus, Param } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
@@ -16,8 +19,7 @@ import type { ChannelFilterKey } from '#domain/channel-filter/channel-filter.js'
 import { channelFilterKeySchema } from '#domain/channel-filter/channel-filter.schema.js'
 import type { NetworkKey } from '#domain/network/network.js'
 import { networkKeySchema } from '#domain/network/network.schema.js'
-
-import { channelFilterToDTO, channelToDTO, networkToDTO, trackToDTO } from './to-dto.js'
+import { currentlyPlayingRow } from '#infrastructure/persistence/currently-playing/sql/currently-playing.row.js'
 
 @Controller('networks')
 @ApiTags('network')
@@ -54,7 +56,7 @@ export class NetworkController {
   @ZodResponse({ description: 'The operation completed successfully.', type: [NetworkDTO] })
   public async getAll() {
     const networks = await this.networkService.getAll()
-    return networks.map(network => networkToDTO(network))
+    return networks.map(network => createNetworkDTO(network))
   }
 
   @Get(':networkKey')
@@ -76,7 +78,7 @@ export class NetworkController {
     @Param('networkKey', new ZodValidationPipe(networkKeySchema)) networkKey: NetworkKey,
   ): Promise<NetworkDTO> {
     const network = await this.networkService.get(networkKey)
-    return networkToDTO(network)
+    return createNetworkDTO(network)
   }
 
   @Get(':networkKey/channels')
@@ -94,7 +96,7 @@ export class NetworkController {
     @Param('networkKey', new ZodValidationPipe(networkKeySchema)) networkKey: NetworkKey,
   ) {
     const channels = await this.channelService.getAllForNetwork(networkKey)
-    return channels.map(channel => channelToDTO(channel))
+    return channels.map(channel => createChannelDTO(channel))
   }
 
   @Get(':networkKey/channels/:channelKey')
@@ -115,10 +117,10 @@ export class NetworkController {
     channelKey: ChannelKey,
   ) {
     const channel = await this.channelService.get(networkKey, channelKey)
-    return channelToDTO(channel)
+    return createChannelDTO(channel)
   }
 
-  @Get(':networkKey/channels/:channelKey/on-air')
+  @Get(':networkKey/channels/:channelKey/currently-playing')
   @ApiParam({ name: 'networkKey', type: 'string', example: 'di' })
   @ApiParam({ name: 'channelKey', type: 'string', example: 'trance' })
   @ApiOperation({
@@ -126,18 +128,26 @@ export class NetworkController {
     description:
       'Get the track currently playing  on the channel with the given key for the given network.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: TrackDTO })
+  @ZodResponse({ description: 'The operation completed successfully.', type: CurrentlyPlayingDTO })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The network or channel with the given key was not found.',
   })
-  public async getNowPlaying(
+  public async getCurrentlyPlaying(
     @Param('networkKey', new ZodValidationPipe(networkKeySchema)) networkKey: NetworkKey,
     @Param('channelKey', new ZodValidationPipe(channelKeySchema))
     channelKey: ChannelKey,
   ) {
-    const track = await this.channelService.getCurrentlyPlaying(networkKey, channelKey)
-    return trackToDTO(track)
+    const currentlyPlaying = await this.channelService.getCurrentlyPlaying(networkKey, channelKey)
+    return createCurrentlyPlayingDTO(
+      currentlyPlaying
+        ? {
+            ...currentlyPlaying,
+            startedAt: currentlyPlaying.startedAt.toISOString(),
+            duration: currentlyPlaying.duration.asSeconds(),
+          }
+        : null,
+    )
   }
 
   @Get(':networkKey/channel-filters')
@@ -155,7 +165,9 @@ export class NetworkController {
     @Param('networkKey', new ZodValidationPipe(networkKeySchema)) networkKey: NetworkKey,
   ) {
     const channelFilters = await this.channelFilterService.getAllForNetwork(networkKey)
-    return channelFilters.map(channelFilter => channelFilterToDTO(channelFilter))
+    return channelFilters.map(channelFilter =>
+      createChannelFilterDTO({ ...channelFilter, channels: [...channelFilter.channels] }),
+    )
   }
 
   @Get(':networkKey/channel-filters/:channelFilterKey')
@@ -176,6 +188,6 @@ export class NetworkController {
     channelFilterKey: ChannelFilterKey,
   ) {
     const channelFilter = await this.channelFilterService.get(networkKey, channelFilterKey)
-    return channelFilterToDTO(channelFilter)
+    return createChannelFilterDTO({ ...channelFilter, channels: [...channelFilter.channels] })
   }
 }

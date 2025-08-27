@@ -57,12 +57,12 @@ export class StreamProvider implements IStreamProvider, OnApplicationShutdown {
     this.active.stream.destroy()
   }
 
-  public getNowPlaying(): { network: Network; channel: Channel; track: string } | null {
+  public getInformation(): { track: string; network: Network; channel: Channel } | null {
     return this.active
       ? {
+          track: this.active.track,
           network: this.active.network,
           channel: this.active.channel,
-          track: this.active.track,
         }
       : null
   }
