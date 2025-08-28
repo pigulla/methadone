@@ -2,12 +2,12 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { type DuckDBConnection, DuckDBInstance } from '@duckdb/node-api'
-import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common'
 
 import type { IDatabase } from './database.interface.js'
 
 @Injectable()
-export class Database implements IDatabase, OnModuleInit, OnModuleDestroy {
+export class Database implements IDatabase, OnModuleInit, OnApplicationShutdown {
   private readonly logger = new Logger(Database.name)
   private instance: DuckDBInstance | null
   private connection: DuckDBConnection | null
@@ -38,8 +38,10 @@ export class Database implements IDatabase, OnModuleInit, OnModuleDestroy {
     await this.db.run(sql)
   }
 
-  public onModuleDestroy(): void {
-    this.logger.debug('Disconnecting from database')
-    this.db?.closeSync()
+  public onApplicationShutdown(_signal?: string): void {
+    if (this.instance) {
+      this.logger.debug('Disconnecting from database')
+      this.instance.closeSync()
+    }
   }
 }

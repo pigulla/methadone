@@ -8,7 +8,7 @@ import { streamStartedDtoSchema } from './stream/stream.started.dto.js'
 import { streamStoppedDtoSchema } from './stream/stream.stopped.dto.js'
 import { streamTrackDtoSchema } from './stream/stream.track.dto.js'
 
-export const EventSchema = z.discriminatedUnion('event', [
+export const eventSchema = z.discriminatedUnion('event', [
   clientConnectedDtoSchema,
   clientDisconnectedDtoSchema,
   clientHeartbeatDtoSchema,
@@ -18,4 +18,4 @@ export const EventSchema = z.discriminatedUnion('event', [
   streamTrackDtoSchema,
 ])
 
-export type Event = z.infer<typeof EventSchema>
+export type Event = z.infer<typeof eventSchema>

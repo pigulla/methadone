@@ -2,10 +2,13 @@
     "files": [],
     "references": [
         {
-            "path": "packages/server"
+            "path": "packages/dto"
         },
         {
-            "path": "packages/dto"
+            "path": "packages/macos-notifier"
+        },
+        {
+            "path": "packages/server"
         }
     ],
     "compilerOptions": {

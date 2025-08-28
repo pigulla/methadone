@@ -35,6 +35,11 @@ export async function bootstrap(): Promise<void> {
     SwaggerModule.setup(openApi.swagger.path, app, () => createOpenAPIDocument(app, openApi))
   }
 
+  process.on('SIGINT', () => {
+    logger.log('Server shutdown requested (SIGINT)')
+    void app.close()
+  })
+
   await app.listen(server.port, server.hostname, async () => {
     const url = await app.getUrl()
     logger.log(`Server listening on ${url}`)

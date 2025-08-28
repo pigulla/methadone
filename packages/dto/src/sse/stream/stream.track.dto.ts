@@ -3,7 +3,9 @@ import { z } from 'zod'
 import { serverSentEventDtoSchema } from '../event.dto.js'
 
 /**
- * This event is emitted whenever the server starts a new track on the ongoing stream.
+ * This event is emitted whenever the server receives information about the track currently being streamed.
+ *
+ * Note that this event may be sent multiple times with the same value (i.e., it is not only being sent on change).
  */
 
 export const streamTrackDtoSchema = serverSentEventDtoSchema.extend({

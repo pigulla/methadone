@@ -29,6 +29,8 @@ import { ConfigModule } from './config.module.js'
             },
             level: map[config.level],
             autoLogging: config.requestResponse,
+            quietReqLogger: !config.requestResponse,
+            quietResLogger: !config.requestResponse,
           },
         }
       },

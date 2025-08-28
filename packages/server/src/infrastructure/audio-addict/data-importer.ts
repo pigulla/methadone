@@ -10,6 +10,8 @@ import { INetworkRepository } from '#domain/network/network.repository.interface
 
 import { IAudioAddictAPI } from './api/audio-addict-api.interface.js'
 
+// TODO: Use Appender? Docs say it's not implemented for JS but there's a DuckDBConnection.createAppender function?
+
 @Injectable()
 export class DataImporter implements OnModuleInit {
   private readonly logger = new Logger(DataImporter.name)

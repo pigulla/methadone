@@ -1,7 +1,7 @@
 {
-    "name": "@methadone/dto",
+    "name": "@methadone/macos-notifier",
     "version": "0.0.1",
-    "description": "The DTO part.",
+    "description": "Notify on MacOS",
     "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
@@ -36,6 +36,9 @@
         "test": "npm run lint && npm run vitest && npm audit --omit dev --audit-level high"
     },
     "dependencies": {
-        "nestjs-zod": "5.0.0"
+        "@methadone/dto": "0.0.1",
+        "eventsource-client": "1.1.4",
+        "execa": "9.6.0",
+        "zod": "4.1.3"
     }
 }

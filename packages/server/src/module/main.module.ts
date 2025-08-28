@@ -12,12 +12,12 @@ import { LoggingModule } from './logging.module.js'
 
 @Module({
   imports: [
-    EventEmitterModule.forRoot(),
+    // EventEmitterModule.forRoot(),
     ConfigModule,
     LoggingModule,
     DatabaseModule,
-    ControllerModule,
-    ApplicationModule,
+    // ControllerModule,
+    // ApplicationModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },

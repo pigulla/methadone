@@ -1,4 +1,4 @@
-import { setInterval } from 'node:timers'
+import { clearInterval, setInterval } from 'node:timers'
 
 import { createClientConnectedDTO } from '@methadone/dto/sse/connection/client.connected.dto.js'
 import { createClientDisconnectedDTO } from '@methadone/dto/sse/connection/client.disconnected.dto.js'
@@ -39,7 +39,7 @@ function generateClientId(): ClientID {
 
 // See https://github.com/nestjs/nest/issues/12670
 
-@Controller('stream/sse')
+@Controller('sse')
 export class ServerSentEventsController implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger(ServerSentEventsController.name)
   private readonly clients: Map<ClientID, ClientConnection>
@@ -67,7 +67,13 @@ export class ServerSentEventsController implements OnApplicationBootstrap, OnMod
   }
 
   public onModuleDestroy(): void {
-    this.logger.log('Closing all client connections')
+    if (this.heartbeatIntervalId !== null) {
+      this.logger.verbose('Stopping heartbeat')
+      clearInterval(this.heartbeatIntervalId)
+      this.heartbeatIntervalId = null
+    }
+
+    this.logger.debug('Closing all client connections')
     for (const [clientId, { close, subject }] of this.clients.entries()) {
       subject.next(createClientDisconnectedDTO({ clientId }))
       close()

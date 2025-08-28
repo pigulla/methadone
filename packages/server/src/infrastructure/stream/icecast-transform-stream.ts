@@ -75,7 +75,7 @@ export class IcecastTransformStream extends Transform {
     this.metaDataIntervalBytes = this.getMetaIntervalFromHeaders(headers)
     this.headersReceived = true
 
-    this.logger.debug(`Metadata expected every ${this.metaDataIntervalBytes} bytes`)
+    this.logger.verbose(`Metadata expected every ${this.metaDataIntervalBytes} bytes`)
   }
 
   private getTitleFromMetadata(metadata: string): string {
@@ -103,7 +103,7 @@ export class IcecastTransformStream extends Transform {
         .toString()
 
       const track = this.getTitleFromMetadata(metadata)
-      this.logger.debug(`Track info in metadata received: "${track}"`)
+      this.logger.verbose(`Metadata received: "${track}"`)
 
       this.eventEmitter.emit(StreamTrackEvent.NAME, new StreamTrackEvent({ track }))
     }

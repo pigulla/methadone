@@ -99,13 +99,13 @@ export class StreamProvider implements IStreamProvider, OnApplicationShutdown {
       network,
       track: '<unknown>',
       stream: stream.once('close', () => {
-        this.logger.debug('Stream closed')
+        this.logger.verbose('Stream closed')
         this.emit(new StreamStoppedEvent())
         this.active = null
       }),
     }
 
-    this.logger.log('Starting stream', { channel: channel.key })
+    this.logger.log({ channel: channel.key }, 'Starting stream')
     this.emit(new StreamStartedEvent({ network, channel }))
 
     // TODO: Get host/port from PLS file?

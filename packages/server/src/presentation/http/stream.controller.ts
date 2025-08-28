@@ -144,20 +144,26 @@ export class StreamController {
     @Param('channelKey', new ZodValidationPipe(channelKeySchema))
     channelKey: ChannelKey,
   ): Promise<void> {
+    this.logger.verbose(
+      { path: this.config.path, arguments: this.config.arguments },
+      'Starting external player',
+    )
+
     const channel = await this.channelService.get(networkKey, channelKey)
     const process = execa(this.config.path, this.config.arguments, {
       stdout: 'ignore',
       stderr: 'ignore',
     })
 
+    this.logger.debug(
+      { processId: process.pid, path: this.config.path, arguments: this.config.arguments },
+      'External player started',
+    )
+    process.on('exit', (code, signal) => {
+      this.logger.debug({ processId: process.pid, code, signal }, 'External player terminated')
+    })
     await this.streamProvider.streamTo(channel, process.stdin)
 
-    process.catch(error => {
-      if (error instanceof ExecaError && error.code === 'ECANCELED') {
-        this.logger.log('External player terminated because stream was closed')
-      } else {
-        this.logger.error(`External player threw an error: ${error.message}`, { error })
-      }
-    })
+    // TODO: Do we need to handle the case where launching the player fails?
   }
 }

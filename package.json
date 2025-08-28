@@ -19,6 +19,7 @@
   "type": "module",
   "workspaces": [
     "packages/dto",
+    "packages/macos-notifier",
     "packages/server"
   ],
   "scripts": {
@@ -69,8 +70,6 @@
     "yaml": "2.8.1"
   },
   "dependencies": {
-    "dayjs": "1.11.14",
-    "execa": "9.6.0",
-    "got": "14.4.7"
+    "zod": "4.1.4"
   }
 }
