@@ -1,8 +1,8 @@
-import { StreamEvent } from './stream.event-name.js'
-
 export class StreamStoppedEvent {
+  public static readonly NAME = 'stream.stopped'
+
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Disable structural typing.
   readonly #brand = Symbol(StreamStoppedEvent.name)
 
-  public readonly name = StreamEvent.STOPPED
+  public readonly name = StreamStoppedEvent.NAME
 }

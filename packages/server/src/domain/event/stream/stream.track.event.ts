@@ -1,16 +1,16 @@
 import z from 'zod'
 
-import { StreamEvent } from './stream.event-name.js'
-
 const optionsSchema = z.strictObject({
   track: z.string(),
 })
 
-export class StreamNewTrackEvent {
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Disable structural typing.
-  readonly #brand = Symbol(StreamNewTrackEvent.name)
+export class StreamTrackEvent {
+  public static readonly NAME = 'stream.track'
 
-  public readonly name = StreamEvent.NEW_TRACK
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Disable structural typing.
+  readonly #brand = Symbol(StreamTrackEvent.name)
+
+  public readonly name = StreamTrackEvent.NAME
   public readonly track: string
 
   public constructor(options: { track: string }) {

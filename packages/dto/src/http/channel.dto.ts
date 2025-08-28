@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { idSchema } from './id.schema.js'
 import { keySchema } from './key.schema.js'
 
-export const channelDtoSchema = z.strictObject({
+export const channelDtoSchema = z.object({
   id: idSchema,
   key: keySchema,
   networkId: idSchema,

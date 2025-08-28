@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { channelDtoSchema, createChannelDTO } from './channel.dto.js'
 import { createNetworkDTO, networkDtoSchema } from './network.dto.js'
 
-export const streamInformationDtoSchema = z.strictObject({
+export const streamInformationDtoSchema = z.object({
   track: z.string(),
   network: networkDtoSchema,
   channel: channelDtoSchema,

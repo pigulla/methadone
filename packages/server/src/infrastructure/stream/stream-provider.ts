@@ -8,10 +8,10 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { IStreamProvider } from '#application/stream-provider.interface.js'
 import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
-import { StreamEvent } from '#domain/event/stream/stream.event-name.js'
-import type { StreamNewTrackEvent } from '#domain/event/stream/stream.new-track.event.js'
+import type { StreamEvent } from '#domain/event/stream/stream.event.js'
 import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js'
 import { StreamStoppedEvent } from '#domain/event/stream/stream.stopped.event.js'
+import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 import type { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 
@@ -75,11 +75,15 @@ export class StreamProvider implements IStreamProvider, OnApplicationShutdown {
       : null
   }
 
-  @OnEvent(StreamEvent.NEW_TRACK)
-  public onStreamTrack(event: StreamNewTrackEvent): void {
+  @OnEvent(StreamTrackEvent.NAME)
+  public onStreamTrack(event: StreamTrackEvent): void {
     if (this.active) {
       this.active.track = event.track
     }
+  }
+
+  private emit(event: StreamEvent): void {
+    this.eventEmitter.emit(event.name, event)
   }
 
   public async streamTo(channel: Channel, stream: Writable): Promise<void> {
@@ -96,13 +100,13 @@ export class StreamProvider implements IStreamProvider, OnApplicationShutdown {
       track: '<unknown>',
       stream: stream.once('close', () => {
         this.logger.debug('Stream closed')
-        this.eventEmitter.emit(StreamEvent.STOPPED, new StreamStoppedEvent())
+        this.emit(new StreamStoppedEvent())
         this.active = null
       }),
     }
 
     this.logger.log('Starting stream', { channel: channel.key })
-    this.eventEmitter.emit(StreamEvent.STARTED, new StreamStartedEvent({ network, channel }))
+    this.emit(new StreamStartedEvent({ network, channel }))
 
     // TODO: Get host/port from PLS file?
     const socket = connect(80, 'prem2.di.fm', () => {

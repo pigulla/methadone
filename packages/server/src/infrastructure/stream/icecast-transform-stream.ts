@@ -3,8 +3,7 @@ import { Transform, type TransformCallback } from 'node:stream'
 import { Injectable, Logger } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 
-import { StreamEvent } from '#domain/event/stream/stream.event-name.js'
-import { StreamNewTrackEvent } from '#domain/event/stream/stream.new-track.event.js'
+import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 
 import { trimTrailingZeroBytes } from './trim-trailing-zero-bytes.js'
 
@@ -104,9 +103,9 @@ export class IcecastTransformStream extends Transform {
         .toString()
 
       const track = this.getTitleFromMetadata(metadata)
-      this.logger.debug(`New track in metadata received: "${track}"`)
+      this.logger.debug(`Track info in metadata received: "${track}"`)
 
-      this.eventEmitter.emit(StreamEvent.NEW_TRACK, new StreamNewTrackEvent({ track }))
+      this.eventEmitter.emit(StreamTrackEvent.NAME, new StreamTrackEvent({ track }))
     }
 
     const data = Buffer.copyBytesFrom(this.buffer, 0, this.metaDataIntervalBytes)

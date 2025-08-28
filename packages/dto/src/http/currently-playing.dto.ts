@@ -1,9 +1,9 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
-export const currentlyPlayingDtoSchema = z.strictObject({
+export const currentlyPlayingDtoSchema = z.object({
   track: z
-    .strictObject({
+    .object({
       artist: z.string(),
       title: z.string(),
       startedAt: z.iso.datetime(),

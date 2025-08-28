@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
-export const trackDtoSchema = z.strictObject({
+export const trackDtoSchema = z.object({
   title: z.string(),
   artist: z.string(),
 })
