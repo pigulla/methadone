@@ -1,4 +1,4 @@
-import { keySchema } from '@methadone/dto/key.schema.js'
+import { keySchema } from '@methadone/dto/http/key.schema.js'
 
 import z from 'zod'
 

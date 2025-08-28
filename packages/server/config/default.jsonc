@@ -38,5 +38,8 @@
     "externalPlayer": {
         "path": "",
         "arguments": []
+    },
+    "application": {
+        "heartbeatIntervalInSeconds": 15
     }
 }

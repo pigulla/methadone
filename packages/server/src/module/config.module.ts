@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import type { IConfig } from 'config'
 
+import { APPLICATION_CONFIG, type ApplicationConfig } from '#application/application.config.js'
 import {
   AUDIO_ADDICT_CONFIG,
   type AudioAddictConfig,
@@ -60,6 +61,11 @@ const NODE_CONFIG = Symbol('node-config')
       inject: [CONFIG],
       useFactory: (config: Config): ExternalPlayerConfig => config.externalPlayer,
     },
+    {
+      provide: APPLICATION_CONFIG,
+      inject: [CONFIG],
+      useFactory: (config: Config): ApplicationConfig => config.application,
+    },
   ],
   exports: [
     SERVER_CONFIG,
@@ -67,6 +73,7 @@ const NODE_CONFIG = Symbol('node-config')
     LOGGING_CONFIG,
     AUDIO_ADDICT_CONFIG,
     EXTERNAL_PLAYER_CONFIG,
+    APPLICATION_CONFIG,
   ],
 })
 export class ConfigModule {}

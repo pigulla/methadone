@@ -1,8 +1,5 @@
-import { Readable } from 'node:stream'
-
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
-import { type Got, got, Response } from 'got'
-import Options from 'got/dist/source/core/options.js'
+import { type Got, got, type Options, type Response } from 'got'
 import ResponseLike from 'responselike'
 import type { JsonValue } from 'type-fest'
 
@@ -11,6 +8,7 @@ import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { Network, type NetworkKey } from '#domain/network/network.js'
 
+import { ICache } from '../../cache/cache.interface.js'
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
 
 import type { IAudioAddictAPI } from './audio-addict-api.interface.js'
@@ -18,14 +16,16 @@ import { channelsDtoSchema } from './dto/channel.dto.js'
 import { channelFiltersDtoSchema } from './dto/channel-filter.dto.js'
 import { currentlyPlayingDtoSchema } from './dto/currently-playing.dto.js'
 import { networksDtoSchema } from './dto/network.dto.js'
-import { IETagCache } from './etag-cache.interface.js'
 
 @Injectable()
 export class AudioAddictAPI implements IAudioAddictAPI {
   private readonly http: Got
-  private readonly cache: IETagCache
+  private readonly cache: ICache<{ etag: string }>
 
-  public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig, cache: IETagCache) {
+  public constructor(
+    @Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig,
+    cache: ICache<{ etag: string }>,
+  ) {
     this.cache = cache
     this.http = got.extend({
       prefixUrl: config.baseUrl,
@@ -37,7 +37,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
                 const cached = await this.cache.get(cacheKey)
 
                 if (cached) {
-                  options.headers['if-none-match'] = cached.etag
+                  options.headers['if-none-match'] = cached.meta.etag
                 }
               },
             ],
@@ -62,9 +62,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
                 }
 
                 if (response.headers.etag) {
-                  await this.cache.set(cacheKey, {
+                  await this.cache.set(cacheKey, JSON.parse(response.body as string) as JsonValue, {
                     etag: response.headers.etag,
-                    value: JSON.parse(response.body as string) as JsonValue,
                   })
                 }
 

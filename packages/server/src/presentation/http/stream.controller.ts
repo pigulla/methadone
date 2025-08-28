@@ -1,7 +1,7 @@
 import {
   createStreamInformationDTO,
   StreamInformationDTO,
-} from '@methadone/dto/stream-information.dto.js'
+} from '@methadone/dto/http/stream-information.dto.js'
 
 import {
   Controller,

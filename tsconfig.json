@@ -7,5 +7,9 @@
         {
             "path": "packages/dto"
         }
-    ]
+    ],
+    "compilerOptions": {
+        "module": "nodenext",
+        "target": "ES2024"
+    }
 }

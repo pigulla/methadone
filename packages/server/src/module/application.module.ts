@@ -10,15 +10,14 @@ import { NetworkService } from '#application/network.service.js'
 import { IStreamProvider } from '#application/stream-provider.interface.js'
 import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 import { AudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.js'
-import { IETagCache } from '#infrastructure/audio-addict/api/etag-cache.interface.js'
-import { CACHE_DIRECTORY, ETagCache } from '#infrastructure/audio-addict/api/etag-cache.js'
+import { ICurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'
+import { CurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.js'
 import { DataImporter } from '#infrastructure/audio-addict/data-importer.js'
+import { ICache } from '#infrastructure/cache/cache.interface.js'
+import { CACHE_DIRECTORY, FileSystemCache } from '#infrastructure/cache/file-system-cache.js'
 import { IIcecastTransformStream } from '#infrastructure/stream/icecast-transform-stream.interface.js'
 import { IcecastTransformStream } from '#infrastructure/stream/icecast-transform-stream.js'
 import { StreamProvider } from '#infrastructure/stream/stream-provider.js'
-
-import { ICurrentlyPlayingUpdater } from '../infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'
-import { CurrentlyPlayingUpdater } from '../infrastructure/audio-addict/currently-playing/currently-playing-updater.js'
 
 import { ConfigModule } from './config.module.js'
 import { RepositoryModule } from './repository.module.js'
@@ -27,7 +26,7 @@ import { RepositoryModule } from './repository.module.js'
   imports: [RepositoryModule, ConfigModule],
   providers: [
     { provide: IAudioAddictAPI, useClass: AudioAddictAPI },
-    { provide: IETagCache, useClass: ETagCache },
+    { provide: ICache, useClass: FileSystemCache },
     {
       provide: CACHE_DIRECTORY,
       useValue: findCacheDirectory({ name: '@methadone/server', create: true }),

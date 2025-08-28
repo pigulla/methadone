@@ -1,10 +1,10 @@
-import { ChannelDTO, createChannelDTO } from '@methadone/dto/channel.dto.js'
-import { ChannelFilterDTO, createChannelFilterDTO } from '@methadone/dto/channel-filter.dto.js'
+import { ChannelDTO, createChannelDTO } from '@methadone/dto/http/channel.dto.js'
+import { ChannelFilterDTO, createChannelFilterDTO } from '@methadone/dto/http/channel-filter.dto.js'
 import {
   CurrentlyPlayingDTO,
   createCurrentlyPlayingDTO,
-} from '@methadone/dto/currently-playing.dto.js'
-import { createNetworkDTO, NetworkDTO } from '@methadone/dto/network.dto.js'
+} from '@methadone/dto/http/currently-playing.dto.js'
+import { createNetworkDTO, NetworkDTO } from '@methadone/dto/http/network.dto.js'
 
 import { Controller, Get, HttpStatus, Param } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'

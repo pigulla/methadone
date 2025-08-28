@@ -16,7 +16,10 @@ dayjs.extend(durationPlugin)
 dayjs.extend(objectSupportPlugin)
 
 export async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestExpressApplication>(MainModule, { bufferLogs: false })
+  const app = await NestFactory.create<NestExpressApplication>(MainModule, {
+    bufferLogs: false,
+    cors: { origin: '*' },
+  })
 
   const server = app.get<ServerConfig>(SERVER_CONFIG)
   const openApi = app.get<OpenApiConfig>(OPEN_API_CONFIG)

@@ -2,22 +2,22 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import type { JsonValue } from 'type-fest'
+import type { JsonObject, JsonValue } from 'type-fest'
 
-import type { IETagCache } from './etag-cache.interface.js'
+import type { ICache } from './cache.interface.js'
 
 export const CACHE_DIRECTORY = Symbol('cache-directory')
 
 @Injectable()
-export class ETagCache implements IETagCache {
-  private readonly logger = new Logger(ETagCache.name)
+export class FileSystemCache<M extends JsonObject> implements ICache<M> {
+  private readonly logger = new Logger(FileSystemCache.name)
   private readonly cacheDirectory: string
 
   public constructor(@Inject(CACHE_DIRECTORY) cacheDirectory: string) {
     this.cacheDirectory = cacheDirectory
   }
 
-  public async get<T extends JsonValue>(key: string): Promise<{ etag: string; value: T } | null> {
+  public async get<T extends JsonValue>(key: string): Promise<{ meta: M; value: T } | null> {
     const file = join(this.cacheDirectory, `${key}.json`)
 
     try {
@@ -34,13 +34,10 @@ export class ETagCache implements IETagCache {
     }
   }
 
-  public async set<T extends JsonValue>(
-    key: string,
-    data: { etag: string; value: T },
-  ): Promise<void> {
+  public async set<T extends JsonValue>(key: string, value: T, meta: M): Promise<void> {
     const file = join(this.cacheDirectory, `${key}.json`)
 
     this.logger.verbose(`Cache updated for "${key}"`)
-    await writeFile(file, JSON.stringify(data))
+    await writeFile(file, JSON.stringify({ meta, value }))
   }
 }

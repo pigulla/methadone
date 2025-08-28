@@ -5,7 +5,7 @@ import {
   Injectable,
   Logger,
   type OnApplicationBootstrap,
-  type OnApplicationShutdown,
+  type OnModuleDestroy,
 } from '@nestjs/common'
 import type { Duration } from 'dayjs/plugin/duration.js'
 
@@ -22,7 +22,7 @@ import type { ICurrentlyPlayingUpdater } from './currently-playing-updater.inter
 
 @Injectable()
 export class CurrentlyPlayingUpdater
-  implements ICurrentlyPlayingUpdater, OnApplicationBootstrap, OnApplicationShutdown
+  implements ICurrentlyPlayingUpdater, OnApplicationBootstrap, OnModuleDestroy
 {
   private readonly logger = new Logger(CurrentlyPlayingUpdater.name)
   private readonly intervalDuration: Duration
@@ -47,12 +47,12 @@ export class CurrentlyPlayingUpdater
   public async onApplicationBootstrap(): Promise<void> {
     await this.update()
 
-    if (this.intervalId === null) {
-      this.intervalId = setInterval(() => this.update(), this.intervalDuration.asMilliseconds())
-    }
+    // if (this.intervalId === null) {
+    //   this.intervalId = setInterval(() => this.update(), this.intervalDuration.asMilliseconds())
+    // }
   }
 
-  public onApplicationShutdown(_signal?: string): void {
+  public onModuleDestroy(): void {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId)
       this.intervalId = null

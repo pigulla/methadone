@@ -1,15 +1,14 @@
-import { EventEmitter } from 'node:events'
 import { Transform, type TransformCallback } from 'node:stream'
 
 import { Injectable, Logger } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
-import type { TrackChangeCallback } from '#infrastructure/stream/icecast-transform-stream.interface.js'
+import { StreamEvent } from '#domain/event/stream/stream.event-name.js'
+import { StreamNewTrackEvent } from '#domain/event/stream/stream.new-track.event.js'
 
 import { trimTrailingZeroBytes } from './trim-trailing-zero-bytes.js'
 
 // See https://stackoverflow.com/questions/4911062/pulling-track-info-from-an-audio-stream-using-php/4914538#4914538
-
-export const TRACK_CHANGED = Symbol('track-changed')
 
 const HEADER_BODY_SEPARATOR = '\r\n\r\n'
 const META_INTERVAL_HEADER = 'icy-metaint'
@@ -20,15 +19,15 @@ const MAX_META_SIZE_BYTES = 256 ** META_SIZE_FIELD_WIDTH * META_SIZE_MULTIPLIER
 @Injectable()
 export class IcecastTransformStream extends Transform {
   private readonly logger = new Logger(IcecastTransformStream.name)
-  private readonly eventEmitter: EventEmitter
+  private readonly eventEmitter: EventEmitter2
   private metaDataIntervalBytes: number
   private headersReceived: boolean
   private buffer: Buffer
 
-  public constructor() {
+  public constructor(eventEmitter: EventEmitter2) {
     super()
 
-    this.eventEmitter = new EventEmitter()
+    this.eventEmitter = eventEmitter
     this.metaDataIntervalBytes = Number.POSITIVE_INFINITY
     this.headersReceived = false
     this.buffer = Buffer.allocUnsafe(0)
@@ -104,10 +103,10 @@ export class IcecastTransformStream extends Transform {
         )
         .toString()
 
-      const title = this.getTitleFromMetadata(metadata)
-      this.logger.debug(`New title in metadata received: "${title}"`)
+      const track = this.getTitleFromMetadata(metadata)
+      this.logger.debug(`New track in metadata received: "${track}"`)
 
-      this.eventEmitter.emit(TRACK_CHANGED, title)
+      this.eventEmitter.emit(StreamEvent.NEW_TRACK, new StreamNewTrackEvent({ track }))
     }
 
     const data = Buffer.copyBytesFrom(this.buffer, 0, this.metaDataIntervalBytes)
@@ -126,10 +125,6 @@ export class IcecastTransformStream extends Transform {
     return (
       this.buffer.length >= this.metaDataIntervalBytes + META_SIZE_FIELD_WIDTH + MAX_META_SIZE_BYTES
     )
-  }
-
-  public onTrackChange(callback: TrackChangeCallback): void {
-    this.eventEmitter.on(TRACK_CHANGED, callback)
   }
 
   public override _transform(
