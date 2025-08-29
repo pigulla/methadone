@@ -1,5 +1,3 @@
-import { PassThrough } from 'node:stream'
-
 import {
   Inject,
   Injectable,
@@ -11,7 +9,6 @@ import { execa, type ResultPromise } from 'execa'
 
 import { type IPlayer } from '#application/player.interface.js'
 import { IStreamProvider } from '#application/stream-provider.interface.js'
-import type { Channel } from '#domain/channel/channel.js'
 
 import {
   EXTERNAL_PLAYER_CONFIG,
@@ -23,7 +20,6 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
   private readonly logger = new Logger(ExternalPlayer.name)
   private readonly streamProvider: IStreamProvider
   private readonly config: ExternalPlayerConfig
-  private readonly stream: PassThrough
   private process: ResultPromise | null
 
   public constructor(
@@ -32,21 +28,8 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
   ) {
     this.streamProvider = streamProvider
     this.config = config
-    this.stream = new PassThrough()
     this.process = null
   }
-
-  public async play(channel: Channel): Promise<void> {
-    if (!this.process) {
-      throw new Error('External player unavailable')
-    }
-
-    this.stream.unpipe()
-
-    await this.streamProvider.streamTo(channel, this.stream)
-  }
-
-  public async stop(): Promise<void> {}
 
   public async onApplicationBootstrap(): Promise<void> {
     await this.launch()
@@ -54,7 +37,6 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
 
   public async onApplicationShutdown(_signal?: string): Promise<void> {
     await this.terminate()
-    this.stream.destroy()
   }
 
   private async launch(): Promise<void> {
@@ -64,7 +46,7 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
 
     await new Promise<void>((resolve, _reject) => {
       this.process = execa(path, options, {
-        input: this.stream,
+        input: this.streamProvider.stream,
         reject: false,
         killSignal: 'SIGTERM',
         // TODO: Make stdout/stderr available for debugging?

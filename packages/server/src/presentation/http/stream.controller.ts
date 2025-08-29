@@ -9,28 +9,21 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
-  Logger,
   NotFoundException,
   Param,
   Post,
   Res,
 } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
-import { ExecaError, execa } from 'execa'
 import type { Response } from 'express'
 import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
 import { IChannelService } from '#application/channel.service.interface.js'
-import { IPlayer } from '#application/player.interface.js'
+import { IStreamProvider } from '#application/stream-provider.interface.js'
 import type { ChannelKey } from '#domain/channel/channel.js'
 import { channelKeySchema } from '#domain/channel/channel.schema.js'
 import type { NetworkKey } from '#domain/network/network.js'
 import { networkKeySchema } from '#domain/network/network.schema.js'
-import {
-  EXTERNAL_PLAYER_CONFIG,
-  type ExternalPlayerConfig,
-} from '#infrastructure/config/external-player.config.js'
 
 @Controller('stream')
 @ApiTags('stream')
@@ -45,19 +38,12 @@ import {
   description: 'An unexpected error occurred.',
 })
 export class StreamController {
-  private readonly logger = new Logger(StreamController.name)
   private readonly channelService: IChannelService
-  private readonly player: IPlayer
-  private readonly config: ExternalPlayerConfig
+  private readonly streamProvider: IStreamProvider
 
-  public constructor(
-    channelService: IChannelService,
-    player: IPlayer,
-    @Inject(EXTERNAL_PLAYER_CONFIG) config: ExternalPlayerConfig,
-  ) {
+  public constructor(channelService: IChannelService, streamProvider: IStreamProvider) {
     this.channelService = channelService
-    this.player = player
-    this.config = config
+    this.streamProvider = streamProvider
   }
 
   @Delete()
@@ -67,8 +53,8 @@ export class StreamController {
     description:
       'Stop playback of the current stream (if any). Note that a client may continue playing until its local buffer is empty.',
   })
-  public async stop(): Promise<void> {
-    await this.player.stop()
+  public stop(): void {
+    this.streamProvider.stop()
   }
 
   @Get()
@@ -119,7 +105,7 @@ export class StreamController {
   ): Promise<void> {
     response.set('content-type', 'audio/aac')
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.streamProvider.streamTo(channel, response)
+    // TODO: Implement me
   }
 
   @Post(':networkKey/:channelKey')
@@ -145,6 +131,6 @@ export class StreamController {
     channelKey: ChannelKey,
   ): Promise<void> {
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.player.play(channel)
+    await this.streamProvider.start(channel)
   }
 }

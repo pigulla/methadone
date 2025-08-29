@@ -1,5 +1,5 @@
 import { connect, type Socket } from 'node:net'
-import type { Writable } from 'node:stream'
+import { PassThrough } from 'node:stream'
 
 import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
@@ -10,7 +10,6 @@ import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
 import type { StreamEvent } from '#domain/event/stream/stream.event.js'
 import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js'
-import { StreamStoppedEvent } from '#domain/event/stream/stream.stopped.event.js'
 import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 import type { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
@@ -25,17 +24,21 @@ const suffixMap: Readonly<Record<AudioFormat, string>> = {
   [AUDIO_FORMAT.AAC_64]: '_aac',
 }
 
+// TODO: Find a better name for this thing.
+
 @Injectable()
 export class StreamProvider implements IStreamProvider, OnModuleDestroy {
+  public readonly stream: PassThrough
+
   private readonly logger = new Logger(StreamProvider.name)
   private readonly networkRepository: INetworkRepository
   private readonly config: AudioAddictConfig
   private readonly moduleRef: ModuleRef
   private readonly eventEmitter: EventEmitter2
+
   private active: {
     network: Network
     channel: Channel
-    stream: Writable
     track: string
     socket: Socket
   } | null
@@ -51,6 +54,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     this.eventEmitter = eventEmitter
     this.moduleRef = moduleRef
     this.active = null
+    this.stream = new PassThrough()
   }
 
   public onModuleDestroy(): void {
@@ -58,11 +62,15 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
   }
 
   public stop(): void {
-    if (this.active === null || this.active.stream.closed || this.active.stream.destroyed) {
+    if (this.active === null) {
       return
     }
 
     this.logger.log('Stopping stream')
+    this.active.socket.unpipe()
+    this.active.socket.destroy()
+
+    this.active = null
   }
 
   public getInformation(): { track: string; network: Network; channel: Channel } | null {
@@ -86,7 +94,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     this.eventEmitter.emit(event.name, event)
   }
 
-  public async streamTo(channel: Channel, stream: Writable): Promise<void> {
+  public async start(channel: Channel): Promise<void> {
     const path = `/${channel.key}${suffixMap[this.config.format]}?${this.config.listeningKey}`
     const [network, icecastTransformStream] = await Promise.all([
       this.networkRepository.getByID(channel.networkId),
@@ -97,7 +105,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
 
     // TODO: Get host/port from PLS file?
     const socket = connect(80, 'prem2.di.fm', () => {
-      socket.pipe(icecastTransformStream).pipe(stream)
+      socket.pipe(icecastTransformStream).pipe(this.stream)
       socket.write([`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\r\n'))
     })
 
@@ -106,14 +114,9 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
       network,
       track: '<unknown>',
       socket,
-      stream: stream.once('close', () => {
-        this.logger.verbose('Stream closed')
-        this.emit(new StreamStoppedEvent())
-        this.active = null
-      }),
     }
 
-    this.logger.log({ channel: channel.key }, 'Starting stream')
+    this.logger.log({ channel: channel.key }, 'Stream started')
     this.emit(new StreamStartedEvent({ network, channel }))
   }
 }
