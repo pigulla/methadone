@@ -22,7 +22,7 @@ import type { Response } from 'express'
 import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
 import { IChannelService } from '#application/channel.service.interface.js'
-import { IStreamProvider } from '#application/stream-provider.interface.js'
+import { IPlayer } from '#application/player.interface.js'
 import type { ChannelKey } from '#domain/channel/channel.js'
 import { channelKeySchema } from '#domain/channel/channel.schema.js'
 import type { NetworkKey } from '#domain/network/network.js'
@@ -47,16 +47,16 @@ import {
 export class StreamController {
   private readonly logger = new Logger(StreamController.name)
   private readonly channelService: IChannelService
-  private readonly streamProvider: IStreamProvider
+  private readonly player: IPlayer
   private readonly config: ExternalPlayerConfig
 
   public constructor(
     channelService: IChannelService,
-    streamProvider: IStreamProvider,
+    player: IPlayer,
     @Inject(EXTERNAL_PLAYER_CONFIG) config: ExternalPlayerConfig,
   ) {
     this.channelService = channelService
-    this.streamProvider = streamProvider
+    this.player = player
     this.config = config
   }
 
@@ -67,8 +67,8 @@ export class StreamController {
     description:
       'Stop playback of the current stream (if any). Note that a client may continue playing until its local buffer is empty.',
   })
-  public stop(): void {
-    this.streamProvider.stop()
+  public async stop(): Promise<void> {
+    await this.player.stop()
   }
 
   @Get()
@@ -144,35 +144,7 @@ export class StreamController {
     @Param('channelKey', new ZodValidationPipe(channelKeySchema))
     channelKey: ChannelKey,
   ): Promise<void> {
-    this.logger.verbose(
-      { path: this.config.path, arguments: this.config.arguments },
-      'Starting external player',
-    )
-
     const channel = await this.channelService.get(networkKey, channelKey)
-    const process = execa(this.config.path, this.config.arguments, {
-      stdout: 'ignore',
-      stderr: 'ignore',
-    })
-
-    this.logger.debug(
-      { processId: process.pid, path: this.config.path, arguments: this.config.arguments },
-      'External player started',
-    )
-    process.on('exit', (code, signal) => {
-      this.logger.debug({ processId: process.pid, code, signal }, 'External player terminated')
-    })
-    await this.streamProvider.streamTo(channel, process.stdin)
-
-    process.catch(error => {
-      if (
-        error instanceof ExecaError &&
-        ['ERR_STREAM_PREMATURE_CLOSE', 'ECANCELED'].includes(error.code ?? '')
-      ) {
-        return
-      }
-
-      throw error
-    })
+    await this.player.play(channel)
   }
 }

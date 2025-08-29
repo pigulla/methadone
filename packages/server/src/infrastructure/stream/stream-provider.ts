@@ -1,4 +1,4 @@
-import { connect } from 'node:net'
+import { connect, type Socket } from 'node:net'
 import type { Writable } from 'node:stream'
 
 import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common'
@@ -37,6 +37,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     channel: Channel
     stream: Writable
     track: string
+    socket: Socket
   } | null
 
   public constructor(
@@ -61,8 +62,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
       return
     }
 
-    this.logger.log('Closing stream')
-    this.active.stream.destroy()
+    this.logger.log('Stopping stream')
   }
 
   public getInformation(): { track: string; network: Network; channel: Channel } | null {
@@ -94,10 +94,18 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     ])
 
     this.stop()
+
+    // TODO: Get host/port from PLS file?
+    const socket = connect(80, 'prem2.di.fm', () => {
+      socket.pipe(icecastTransformStream).pipe(stream)
+      socket.write([`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\r\n'))
+    })
+
     this.active = {
       channel,
       network,
       track: '<unknown>',
+      socket,
       stream: stream.once('close', () => {
         this.logger.verbose('Stream closed')
         this.emit(new StreamStoppedEvent())
@@ -107,11 +115,5 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
 
     this.logger.log({ channel: channel.key }, 'Starting stream')
     this.emit(new StreamStartedEvent({ network, channel }))
-
-    // TODO: Get host/port from PLS file?
-    const socket = connect(80, 'prem2.di.fm', () => {
-      socket.pipe(icecastTransformStream).pipe(stream)
-      socket.write([`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\r\n'))
-    })
   }
 }

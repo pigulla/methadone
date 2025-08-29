@@ -49,6 +49,7 @@ import { RepositoryModule } from './repository.module.js'
       provide: IStreamProvider,
       useClass: StreamProvider,
     },
+
     { provide: IIcecastTransformStream, useClass: IcecastTransformStream, scope: Scope.TRANSIENT },
   ],
   exports: [INetworkService, IChannelService, IChannelFilterService, IStreamProvider],
