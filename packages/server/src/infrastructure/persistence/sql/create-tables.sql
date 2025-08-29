@@ -2,7 +2,8 @@ CREATE TABLE networks (
   id UINTEGER PRIMARY KEY NOT NULL,
   key VARCHAR UNIQUE NOT NULL,
   name VARCHAR NOT NULL,
-  url VARCHAR NOT NULL
+  url VARCHAR NOT NULL,
+  listen_url VARCHAR NOT NULL
 );
 
 CREATE TABLE channels (
@@ -58,3 +59,26 @@ CREATE TABLE currently_playing (
     )
   )
 );
+
+CREATE VIEW view_channels AS
+SELECT
+  channels.id,
+  channels.network_id,
+  channels.key,
+  channels.name,
+  channels.description,
+  channels.director,
+  COALESCE(
+    (
+      SELECT
+        JSON_GROUP_ARRAY(similar_channels.similar_channel_id)
+      FROM
+        similar_channels
+        JOIN channels ON channels.id = similar_channels.channel_id
+      WHERE
+        similar_channels.channel_id = channels.id
+    ),
+    '[]'
+  ) AS similar_channels
+FROM
+  channels;

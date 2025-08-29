@@ -9,12 +9,11 @@ export const networksRow = z
     key: networkKeySchema,
     name: z.string(),
     url: z.httpUrl(),
+    listen_url: z.httpUrl(),
   })
   .transform(data => ({
     ...data,
-    toDomain: () => {
-      return new Network(data)
-    },
+    toDomain: () => new Network({ ...data, listenUrl: data.listen_url }),
   }))
   .readonly()
   .brand('networks-row')

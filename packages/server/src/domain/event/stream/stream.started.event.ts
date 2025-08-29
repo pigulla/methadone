@@ -19,7 +19,7 @@ export class StreamStartedEvent {
   public readonly channel: Channel
 
   public constructor(options: { network: Network; channel: Channel }) {
-    const { network, channel } = optionsSchema.parse(options)
+    const { network, channel } = optionsSchema.loose().parse(options)
 
     this.network = network
     this.channel = channel

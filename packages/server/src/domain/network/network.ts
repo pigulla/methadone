@@ -20,14 +20,22 @@ export class Network {
   public readonly key: NetworkKey
   public readonly name: string
   public readonly url: string
+  public readonly listenUrl: string
 
-  public constructor(data: { id: NetworkID; key: NetworkKey; name: string; url: string }) {
-    const { id, key, name, url } = networkSchema.parse(data)
+  public constructor(data: {
+    id: NetworkID
+    key: NetworkKey
+    name: string
+    url: string
+    listenUrl: string
+  }) {
+    const { id, key, name, url, listenUrl } = networkSchema.loose().parse(data)
 
     this.id = id
     this.key = key
     this.name = name
     this.url = url
+    this.listenUrl = listenUrl
   }
 
   public static create({
@@ -35,17 +43,20 @@ export class Network {
     key,
     name,
     url,
+    listenUrl,
   }: {
     id: number
     key: string
     name: string
     url: string
+    listenUrl: string
   }): Network {
     return new Network({
       id: asNetworkID(id),
       key: asNetworkKey(key),
       name,
       url,
+      listenUrl,
     })
   }
 
@@ -55,6 +66,7 @@ export class Network {
       key: this.key,
       name: this.name,
       url: this.url,
+      listenUrl: this.listenUrl,
     }
   }
 }

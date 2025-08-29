@@ -2,7 +2,8 @@ SELECT
   id,
   key,
   name,
-  url
+  url,
+  listen_url
 FROM
   networks
 WHERE

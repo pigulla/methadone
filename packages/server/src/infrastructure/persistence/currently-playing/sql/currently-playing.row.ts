@@ -38,16 +38,13 @@ export const currentlyPlayingRow = z
   ])
   .transform(data => ({
     ...data,
-    toDomain: () => {
-      const { channel_id: _, started_at, ...other } = data
-      return other.artist === null
+    toDomain: () =>
+      data.artist === null
         ? null
         : new CurrentlyPlaying({
-            ...other,
-            startedAt: started_at!,
-            duration: other.duration!,
-          })
-    },
+            ...data,
+            startedAt: data.started_at,
+          }),
   }))
   .readonly()
   .brand('currently-playing-row')

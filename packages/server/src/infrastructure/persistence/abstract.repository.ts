@@ -1,5 +1,3 @@
-import { join } from 'node:path'
-
 import type { OnModuleInit } from '@nestjs/common'
 
 import { IDatabase } from './database.interface.js'

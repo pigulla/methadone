@@ -13,6 +13,7 @@ import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js
 import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 import type { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
+import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../config/audio-addict.config.js'
 
@@ -31,6 +32,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
   public readonly format: AudioFormat
 
   private readonly logger = new Logger(StreamManager.name)
+  private readonly audioAddictApi: IAudioAddictAPI
   private readonly networkRepository: INetworkRepository
   private readonly config: AudioAddictConfig
   private readonly moduleRef: ModuleRef
@@ -47,12 +49,14 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
   public constructor(
     networkRepository: INetworkRepository,
     @Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig,
+    audioAddictApi: IAudioAddictAPI,
     eventEmitter: EventEmitter2,
     moduleRef: ModuleRef,
   ) {
     this.format = config.format
     this.networkRepository = networkRepository
     this.config = config
+    this.audioAddictApi = audioAddictApi
     this.eventEmitter = eventEmitter
     this.moduleRef = moduleRef
     this.active = null
@@ -97,7 +101,6 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
   }
 
   public async start(channel: Channel, destination: Writable = this.stream): Promise<void> {
-    const path = `/${channel.key}${suffixMap[this.config.format]}?${this.config.listeningKey}`
     const [network, icecastTransformStream] = await Promise.all([
       this.networkRepository.getByID(channel.networkId),
       this.moduleRef.resolve(IIcecastTransformStream),
@@ -105,10 +108,16 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
 
     this.stop()
 
-    // TODO: Get host/port from PLS file?
-    const socket = connect(80, 'prem2.di.fm', () => {
+    const { hostname, pathname } = new URL(await this.audioAddictApi.getStreamURL(network, channel))
+
+    // TODO: Don't hardcode the port
+    const socket = connect(80, hostname, () => {
       socket.pipe(icecastTransformStream).pipe(destination)
-      socket.write([`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\r\n'))
+      socket.write(
+        [`GET ${pathname}?${this.config.listeningKey} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join(
+          '\r\n',
+        ),
+      )
     })
 
     this.active = {

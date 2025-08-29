@@ -37,7 +37,7 @@ export class ChannelFilter {
     position: number
     channels: Set<ChannelID>
   }) {
-    const { id, key, networkId, name, position, channels } = channelFilterSchema.parse(data)
+    const { id, key, networkId, name, position, channels } = channelFilterSchema.loose().parse(data)
 
     this.id = id
     this.key = key

@@ -14,7 +14,7 @@ export class StreamTrackEvent {
   public readonly track: string
 
   public constructor(options: { track: string }) {
-    const { track } = optionsSchema.parse(options)
+    const { track } = optionsSchema.loose().parse(options)
 
     this.track = track
   }

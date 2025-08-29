@@ -19,7 +19,7 @@ export class CurrentlyPlaying {
     startedAt: Dayjs
     duration: Duration
   }) {
-    const { artist, title, startedAt, duration } = currentlyPlayingSchema.parse(data)
+    const { artist, title, startedAt, duration } = currentlyPlayingSchema.loose().parse(data)
 
     this.artist = artist
     this.title = title

@@ -4,8 +4,9 @@ SELECT
   network_id,
   name,
   description,
-  director
+  director,
+  similar_channels
 FROM
-  channels
+  view_channels
 WHERE
   id = $id;

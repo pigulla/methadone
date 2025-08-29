@@ -36,7 +36,9 @@ export class Channel {
     description: string
     similar: Set<ChannelID>
   }) {
-    const { id, key, networkId, name, director, description, similar } = channelSchema.parse(data)
+    const { id, key, networkId, name, director, description, similar } = channelSchema
+      .loose()
+      .parse(data)
 
     this.id = id
     this.key = key

@@ -65,6 +65,7 @@ export class NetworkRepository
       key: network.key,
       name: network.name,
       url: network.url,
+      listen_url: network.listenUrl,
     })
 
     // TODO: Handle FK violations and duplicate key errors

@@ -17,9 +17,12 @@ export function asNetworkKey(value: string): NetworkKey {
   return networkKeySchema.parse(value)
 }
 
-export const networkSchema = z.strictObject({
-  id: networkIdSchema,
-  key: networkKeySchema,
-  name: z.string().min(1),
-  url: z.httpUrl(),
-})
+export const networkSchema = z
+  .strictObject({
+    id: networkIdSchema,
+    key: networkKeySchema,
+    name: z.string().min(1),
+    url: z.httpUrl(),
+    listenUrl: z.httpUrl(),
+  })
+  .brand('network')

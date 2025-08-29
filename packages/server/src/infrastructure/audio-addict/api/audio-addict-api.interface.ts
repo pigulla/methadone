@@ -10,4 +10,5 @@ export abstract class IAudioAddictAPI {
   public abstract getCurrentlyPlaying(
     key: NetworkKey,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>>
+  public abstract getStreamURL(network: Network, channel: Channel): Promise<string>
 }

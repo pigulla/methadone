@@ -29,5 +29,4 @@ export const channelFilterSchema = z
     position: z.number().int().min(0),
     channels: z.set(channelIdSchema).readonly(),
   })
-  .readonly()
   .brand('channel-filter')

@@ -7,6 +7,7 @@ import { Channel, type ChannelID } from '#domain/channel/channel.js'
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { Network, type NetworkKey } from '#domain/network/network.js'
+import { IPlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.interface.js'
 
 import { ICache } from '../../cache/cache.interface.js'
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
@@ -17,18 +18,26 @@ import { channelFiltersDtoSchema } from './dto/channel-filter.dto.js'
 import { currentlyPlayingDtoSchema } from './dto/currently-playing.dto.js'
 import { networksDtoSchema } from './dto/network.dto.js'
 
+// For some reason, using the network id instead if its key works *sometimes* (e.g., v1/di/channels), but sometimes it
+// doesn't and the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to
+// always using the key.
+
 @Injectable()
 export class AudioAddictAPI implements IAudioAddictAPI {
-  private readonly http: Got
+  private readonly config: AudioAddictConfig
   private readonly cache: ICache<{ etag: string }>
+  private readonly playlistParser: IPlaylistParser
+  private readonly http: Got
 
   public constructor(
     @Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig,
+    playlistParser: IPlaylistParser,
     cache: ICache<{ etag: string }>,
   ) {
+    this.config = config
     this.cache = cache
+    this.playlistParser = playlistParser
     this.http = got.extend({
-      prefixUrl: config.baseUrl,
       hooks: config.useCache
         ? {
             beforeRequest: [
@@ -78,11 +87,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   public async getCurrentlyPlaying(
     key: NetworkKey,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
-    // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
-    // using the key.
     const value = await this.http
-      .get(`v1/${key}/currently_playing`, {
+      .get(`${this.config.baseUrl}/v1/${key}/currently_playing`, {
         context: {
           cacheKey: `${key}.currently-playing`,
         },
@@ -109,7 +115,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
 
   public async getNetworks(): Promise<Network[]> {
     const data = await this.http
-      .get('v1/networks', {
+      .get(`${this.config.baseUrl}/v1/networks`, {
         context: {
           cacheKey: 'networks',
         },
@@ -119,22 +125,20 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     return networksDtoSchema
       .parse(data)
       .filter(network => network.active)
-      .map(({ id, key, name, url }) =>
+      .map(({ id, key, name, url, listen_url }) =>
         Network.create({
           id,
           key,
           name,
           url,
+          listenUrl: listen_url,
         }),
       )
   }
 
   public async getChannels(key: NetworkKey): Promise<Channel[]> {
-    // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
-    // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
-    // using the key.
     const value = await this.http
-      .get(`v1/${key}/channels`, {
+      .get(`${this.config.baseUrl}/v1/${key}/channels`, {
         context: {
           cacheKey: `${key}.channels`,
         },
@@ -157,11 +161,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getChannelFilters(key: NetworkKey): Promise<ChannelFilter[]> {
-    // Sometimes using the network id instead if its key works (e.g., v1/di/channels), but sometimes it doesn't and
-    // the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to always
-    // using the key.
     const value = await this.http
-      .get(`v1/${key}/channel_filters`, {
+      .get(`${this.config.baseUrl}/v1/${key}/channel_filters`, {
         context: {
           cacheKey: `${key}.channels-filters`,
         },
@@ -180,5 +181,21 @@ export class AudioAddictAPI implements IAudioAddictAPI {
           channels,
         }),
       )
+  }
+
+  public async getStreamURL(network: Network, channel: Channel): Promise<string> {
+    const { body } = await this.http.get(`${network.listenUrl}/premium/${channel.key}.pls`, {
+      context: {
+        cacheKey: `${network.key}.${channel.key}.playlist`,
+      },
+    })
+
+    const playlist = this.playlistParser.parse(body)
+
+    if (playlist.length === 0) {
+      throw new Error('Empty playlist received')
+    }
+
+    return playlist[0].file
   }
 }

@@ -6,6 +6,9 @@ import { Injectable, Logger, type OnApplicationShutdown, type OnModuleInit } fro
 
 import type { IDatabase } from './database.interface.js'
 
+// TODO: Return errors as JSON?
+//       https://duckdb.org/docs/stable/configuration/pragmas#returning-errors-as-json
+
 @Injectable()
 export class Database implements IDatabase, OnModuleInit, OnApplicationShutdown {
   private readonly logger = new Logger(Database.name)
@@ -37,6 +40,8 @@ export class Database implements IDatabase, OnModuleInit, OnApplicationShutdown 
 
     await this.db.run(sql)
   }
+
+  public async enableForeignKeyConstraints(): Promise<void> {}
 
   public onApplicationShutdown(_signal?: string): void {
     if (this.instance) {

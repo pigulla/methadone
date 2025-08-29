@@ -29,4 +29,4 @@ export const channelSchema = z
     description: z.string(),
     similar: z.set(channelIdSchema).readonly(),
   })
-  .readonly()
+  .brand('channel')

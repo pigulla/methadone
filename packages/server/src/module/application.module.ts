@@ -10,6 +10,8 @@ import { NetworkService } from '#application/network.service.js'
 import { IStreamManager } from '#application/stream-manager.interface.js'
 import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 import { AudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.js'
+import { IPlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.interface.js'
+import { PlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.js'
 import { ICurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'
 import { CurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.js'
 import { DataImporter } from '#infrastructure/audio-addict/data-importer.js'
@@ -20,12 +22,14 @@ import { IcecastTransformStream } from '#infrastructure/stream/icecast-transform
 import { StreamManager } from '#infrastructure/stream/stream-manager.js'
 
 import { ConfigModule } from './config.module.js'
+import { DatabaseModule } from './database.module.js'
 import { RepositoryModule } from './repository.module.js'
 
 @Module({
-  imports: [RepositoryModule, ConfigModule],
+  imports: [RepositoryModule, ConfigModule, DatabaseModule],
   providers: [
     { provide: IAudioAddictAPI, useClass: AudioAddictAPI },
+    { provide: IPlaylistParser, useClass: PlaylistParser },
     { provide: ICache, useClass: FileSystemCache },
     {
       provide: CACHE_DIRECTORY,

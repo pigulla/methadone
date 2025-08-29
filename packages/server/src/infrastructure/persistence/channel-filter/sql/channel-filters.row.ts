@@ -15,18 +15,19 @@ export const channelFiltersRow = z
     network_id: networkIdSchema,
     name: z.string(),
     position: z.number().int().min(0),
-    channel_ids: z.preprocess(value => JSON.parse(value as string), z.array(channelIdSchema)),
+    channel_ids: z.preprocess(
+      value => (typeof value === 'string' ? JSON.parse(value) : value),
+      z.array(channelIdSchema),
+    ),
   })
   .transform(data => ({
     ...data,
-    toDomain: () => {
-      const { network_id, channel_ids, ...other } = data
-      return new ChannelFilter({
-        ...other,
-        networkId: network_id,
-        channels: new Set(channel_ids),
-      })
-    },
+    toDomain: () =>
+      new ChannelFilter({
+        ...data,
+        networkId: data.network_id,
+        channels: new Set(data.channel_ids),
+      }),
   }))
   .readonly()
   .brand('channel-filters-row')
