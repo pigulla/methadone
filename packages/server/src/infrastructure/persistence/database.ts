@@ -1,8 +1,15 @@
 import { readFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import { type DuckDBConnection, DuckDBInstance } from '@duckdb/node-api'
-import { Injectable, Logger, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+  type OnModuleInit,
+} from '@nestjs/common'
 
 import type { IDatabase } from './database.interface.js'
 
@@ -10,7 +17,9 @@ import type { IDatabase } from './database.interface.js'
 //       https://duckdb.org/docs/stable/configuration/pragmas#returning-errors-as-json
 
 @Injectable()
-export class Database implements IDatabase, OnModuleInit, OnApplicationShutdown {
+export class Database
+  implements IDatabase, OnModuleInit, OnApplicationBootstrap, OnApplicationShutdown
+{
   private readonly logger = new Logger(Database.name)
   private instance: DuckDBInstance | null
   private connection: DuckDBConnection | null
@@ -41,7 +50,16 @@ export class Database implements IDatabase, OnModuleInit, OnApplicationShutdown 
     await this.db.run(sql)
   }
 
-  public async enableForeignKeyConstraints(): Promise<void> {}
+  public async onApplicationBootstrap(): Promise<void> {
+    this.logger.debug('Enabling deferred constraints')
+
+    const file = join(import.meta.dirname, 'sql', 'enable-deferred-constraints.sql')
+    const sql = (await readFile(file, 'utf8'))
+      .toString()
+      .replaceAll('$file', `"${join(tmpdir(), 'enable-deferred-constraints.sql')}"`)
+
+    await this.db.run(sql)
+  }
 
   public onApplicationShutdown(_signal?: string): void {
     if (this.instance) {

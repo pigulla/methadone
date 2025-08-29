@@ -18,7 +18,7 @@ CREATE TABLE channels (
 
 CREATE TABLE similar_channels (
   channel_id UINTEGER REFERENCES channels (id) NOT NULL,
-  similar_channel_id UINTEGER REFERENCES channels (id) CHECK (channel_id <> similar_channel_id) NOT NULL,
+  similar_channel_id UINTEGER CHECK (channel_id <> similar_channel_id) NOT NULL,
   PRIMARY KEY (channel_id, similar_channel_id),
 );
 

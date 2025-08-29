@@ -15,7 +15,15 @@ import { channelsViewRow } from './sql/channels.row.js'
 @Injectable()
 export class ChannelRepository
   extends AbstractRepository<
-    ['get-one', 'get-all', 'get-all-for-network', 'get-one-by-key', 'insert', 'update']
+    [
+      'get-one',
+      'get-all',
+      'get-all-for-network',
+      'get-one-by-key',
+      'insert',
+      'update',
+      'insert-similar-channel',
+    ]
   >
   implements IChannelRepository, OnModuleInit
 {
@@ -29,6 +37,7 @@ export class ChannelRepository
         'get-one-by-key',
         'insert',
         'update',
+        'insert-similar-channel',
       ],
     })
   }
@@ -89,6 +98,17 @@ export class ChannelRepository
     })
     await stmt.run()
 
+    await this.setSimilar(channel)
+
     return this.getByID(channel.id)
+  }
+
+  private async setSimilar(channel: Channel): Promise<void> {
+    const insertStmt = this.stmt.INSERT_SIMILAR_CHANNEL
+
+    for (const similarChannelID of channel.similar) {
+      insertStmt.bind({ channel_id: channel.id, similar_channel_id: similarChannelID })
+      await insertStmt.run()
+    }
   }
 }

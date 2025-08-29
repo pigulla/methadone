@@ -25,7 +25,6 @@ export class DataImporter implements OnModuleInit {
     networkRepository: INetworkRepository,
     channelRepository: IChannelRepository,
     channelFilterRepository: IChannelFilterRepository,
-    database: IDatabase,
   ) {
     this.audioAddictApi = audioAddictApi
     this.networkRepository = networkRepository
@@ -83,12 +82,7 @@ export class DataImporter implements OnModuleInit {
           name: item.name,
           description: item.description,
           director: item.director,
-          // TODO: This is much trickier than expected :-/
-          //       DuckDB does not yet support deferring constraints and also has funky issues with indices (see
-          //       https://duckdb.org/docs/stable/sql/indexes.html). So it looks like we can't defer the FK check until
-          //       all channels have been inserted and we also can't insert-then-update. The only way out seems to be
-          //       to either split the "similar" property off the Channel object or make the repository API really ugly.
-          similar: [],
+          similar: item.similar,
         })
         await this.channelRepository.insert(channel)
       }
