@@ -20,7 +20,7 @@ import type { Response } from 'express'
 import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
 import { IChannelService } from '#application/channel.service.interface.js'
-import { IStreamManager } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-manager.interface.js'
 import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import type { ChannelKey } from '#domain/channel/channel.js'
 import { channelKeySchema } from '#domain/channel/channel.schema.js'
@@ -119,7 +119,7 @@ export class StreamController {
   ): Promise<void> {
     response.set('content-type', audioFormatMap[this.streamProvider.format])
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.streamProvider.streamTo(channel, response)
+    await this.streamProvider.start(channel, { mode: 'external', destination: response })
   }
 
   @Post(':networkKey/:channelKey')

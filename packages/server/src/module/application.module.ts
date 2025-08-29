@@ -7,7 +7,7 @@ import { IChannelFilterService } from '#application/channel-filter.service.inter
 import { ChannelFilterService } from '#application/channel-filter.service.js'
 import { INetworkService } from '#application/network.service.interface.js'
 import { NetworkService } from '#application/network.service.js'
-import { IStreamManager } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-manager.interface.js'
 import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 import { AudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.js'
 import { ICurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'

@@ -28,7 +28,7 @@ import { Subject } from 'rxjs'
 import type { Tagged } from 'type-fest'
 
 import { APPLICATION_CONFIG, type ApplicationConfig } from '#application/application.config.js'
-import { IStreamManager } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-manager.interface.js'
 import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js'
 import { StreamStoppedEvent } from '#domain/event/stream/stream.stopped.event.js'
 import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'

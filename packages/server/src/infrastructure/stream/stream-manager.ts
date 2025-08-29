@@ -5,7 +5,7 @@ import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common
 import { ModuleRef } from '@nestjs/core'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
-import { IStreamManager, type StreamInformation } from '#application/stream-provider.interface.js'
+import { IStreamManager, type StreamInformation } from '#application/stream-manager.interface.js'
 import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
 import type { StreamEvent } from '#domain/event/stream/stream.event.js'
@@ -96,15 +96,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     this.eventEmitter.emit(event.name, event)
   }
 
-  public streamTo(channel: Channel, stream: Writable): Promise<void> {
-    return this.connect(channel, stream)
-  }
-
-  public start(channel: Channel): Promise<void> {
-    return this.connect(channel, this.stream)
-  }
-
-  private async connect(channel: Channel, stream: Writable): Promise<void> {
+  public async start(channel: Channel, destination: Writable = this.stream): Promise<void> {
     const path = `/${channel.key}${suffixMap[this.config.format]}?${this.config.listeningKey}`
     const [network, icecastTransformStream] = await Promise.all([
       this.networkRepository.getByID(channel.networkId),
@@ -115,7 +107,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
 
     // TODO: Get host/port from PLS file?
     const socket = connect(80, 'prem2.di.fm', () => {
-      socket.pipe(icecastTransformStream).pipe(stream)
+      socket.pipe(icecastTransformStream).pipe(destination)
       socket.write([`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\r\n'))
     })
 

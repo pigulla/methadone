@@ -1,1 +1,2 @@
 /packages/server/openapi.*
+/packages/server/config/local*

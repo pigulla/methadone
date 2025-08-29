@@ -8,7 +8,7 @@ import {
 import { ExecaError, execa, type ResultPromise } from 'execa'
 
 import { type IPlayer } from '#application/player.interface.js'
-import { IStreamManager } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-manager.interface.js'
 
 import {
   EXTERNAL_PLAYER_CONFIG,
