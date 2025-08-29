@@ -53,11 +53,11 @@ const audioFormatMap: Readonly<Record<AudioFormat, string>> = {
 })
 export class StreamController {
   private readonly channelService: IChannelService
-  private readonly streamProvider: IStreamManager
+  private readonly streamManager: IStreamManager
 
-  public constructor(channelService: IChannelService, streamProvider: IStreamManager) {
+  public constructor(channelService: IChannelService, streamManager: IStreamManager) {
     this.channelService = channelService
-    this.streamProvider = streamProvider
+    this.streamManager = streamManager
   }
 
   @Delete()
@@ -68,7 +68,7 @@ export class StreamController {
       'Stop playback of the current stream (if any). Note that a client may continue playing until its local buffer is empty.',
   })
   public stop(): void {
-    this.streamProvider.stop()
+    this.streamManager.stop()
   }
 
   @Get()
@@ -82,7 +82,7 @@ export class StreamController {
     description: 'No channel is currently being streamed.',
   })
   public onAir() {
-    const information = this.streamProvider.getInformation()
+    const information = this.streamManager.getInformation()
 
     if (!information) {
       throw new NotFoundException('No channel is currently being streamed')
@@ -117,9 +117,9 @@ export class StreamController {
     channelKey: ChannelKey,
     @Res() response: Response,
   ): Promise<void> {
-    response.set('content-type', audioFormatMap[this.streamProvider.format])
+    response.set('content-type', audioFormatMap[this.streamManager.format])
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.streamProvider.start(channel, { mode: 'external', destination: response })
+    await this.streamManager.start(channel, response)
   }
 
   @Post(':networkKey/:channelKey')
@@ -145,6 +145,6 @@ export class StreamController {
     channelKey: ChannelKey,
   ): Promise<void> {
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.streamProvider.start(channel)
+    await this.streamManager.start(channel)
   }
 }
