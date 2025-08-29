@@ -6,7 +6,7 @@ import {
 } from '@methadone/dto/http/currently-playing.dto.js'
 import { createNetworkDTO, NetworkDTO } from '@methadone/dto/http/network.dto.js'
 
-import { Controller, Get, HttpStatus, Param } from '@nestjs/common'
+import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
 import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
@@ -19,15 +19,20 @@ import type { ChannelFilterKey } from '#domain/channel-filter/channel-filter.js'
 import { channelFilterKeySchema } from '#domain/channel-filter/channel-filter.schema.js'
 import type { NetworkKey } from '#domain/network/network.js'
 import { networkKeySchema } from '#domain/network/network.schema.js'
-import { currentlyPlayingRow } from '#infrastructure/persistence/currently-playing/sql/currently-playing.row.js'
+import { ApiKeyGuard } from '#presentation/http/api-key.guard.js'
 
 @Controller('networks')
+@UseGuards(ApiKeyGuard)
 @ApiTags('network')
-@ApiSecurity({})
+@ApiSecurity('api-key')
 @ApiResponse({
   status: HttpStatus.BAD_REQUEST,
   description:
     'A query or route parameter, the payload or a header was malformed and did not pass validation.',
+})
+@ApiResponse({
+  status: HttpStatus.FORBIDDEN,
+  description: 'No suitable API key was provided by the client.',
 })
 @ApiResponse({
   status: HttpStatus.INTERNAL_SERVER_ERROR,

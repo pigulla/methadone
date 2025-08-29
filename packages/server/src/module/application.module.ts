@@ -7,7 +7,7 @@ import { IChannelFilterService } from '#application/channel-filter.service.inter
 import { ChannelFilterService } from '#application/channel-filter.service.js'
 import { INetworkService } from '#application/network.service.interface.js'
 import { NetworkService } from '#application/network.service.js'
-import { IStreamProvider } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-provider.interface.js'
 import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 import { AudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.js'
 import { ICurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'
@@ -17,7 +17,7 @@ import { ICache } from '#infrastructure/cache/cache.interface.js'
 import { CACHE_DIRECTORY, FileSystemCache } from '#infrastructure/cache/file-system-cache.js'
 import { IIcecastTransformStream } from '#infrastructure/stream/icecast-transform-stream.interface.js'
 import { IcecastTransformStream } from '#infrastructure/stream/icecast-transform-stream.js'
-import { StreamProvider } from '#infrastructure/stream/stream-provider.js'
+import { StreamManager } from '#infrastructure/stream/stream-manager.js'
 
 import { ConfigModule } from './config.module.js'
 import { RepositoryModule } from './repository.module.js'
@@ -46,12 +46,12 @@ import { RepositoryModule } from './repository.module.js'
       useClass: ChannelFilterService,
     },
     {
-      provide: IStreamProvider,
-      useClass: StreamProvider,
+      provide: IStreamManager,
+      useClass: StreamManager,
     },
 
     { provide: IIcecastTransformStream, useClass: IcecastTransformStream, scope: Scope.TRANSIENT },
   ],
-  exports: [INetworkService, IChannelService, IChannelFilterService, IStreamProvider],
+  exports: [INetworkService, IChannelService, IChannelFilterService, IStreamManager],
 })
 export class ApplicationModule {}

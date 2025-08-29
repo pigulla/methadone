@@ -12,23 +12,27 @@ import { createStreamTrackDTO } from '@methadone/dto/sse/stream/stream.track.dto
 import {
   Controller,
   Get,
+  HttpStatus,
   Inject,
   Logger,
   type OnApplicationBootstrap,
   type OnModuleDestroy,
   Res,
+  UseGuards,
 } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
+import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger'
 import { type Response } from 'express'
 import { nanoid } from 'nanoid'
 import { Subject } from 'rxjs'
 import type { Tagged } from 'type-fest'
 
 import { APPLICATION_CONFIG, type ApplicationConfig } from '#application/application.config.js'
-import { IStreamProvider } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-provider.interface.js'
 import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js'
 import { StreamStoppedEvent } from '#domain/event/stream/stream.stopped.event.js'
 import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
+import { ApiKeyGuard } from '#presentation/http/api-key.guard.js'
 
 type ClientID = Tagged<string, 'client-id'>
 type ClientConnection = { close: () => void; subject: Subject<Event> }
@@ -40,15 +44,30 @@ function generateClientId(): ClientID {
 // See https://github.com/nestjs/nest/issues/12670
 
 @Controller('sse')
+@UseGuards(ApiKeyGuard)
+@ApiSecurity('api-key')
+@ApiResponse({
+  status: HttpStatus.BAD_REQUEST,
+  description:
+    'A query or route parameter, the payload or a header was malformed and did not pass validation.',
+})
+@ApiResponse({
+  status: HttpStatus.FORBIDDEN,
+  description: 'No suitable API key was provided by the client.',
+})
+@ApiResponse({
+  status: HttpStatus.INTERNAL_SERVER_ERROR,
+  description: 'An unexpected error occurred.',
+})
 export class ServerSentEventsController implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger(ServerSentEventsController.name)
   private readonly clients: Map<ClientID, ClientConnection>
-  private readonly streamProvider: IStreamProvider
+  private readonly streamProvider: IStreamManager
   private readonly config: ApplicationConfig
   private heartbeatIntervalId: NodeJS.Timeout | null
 
   public constructor(
-    streamProvider: IStreamProvider,
+    streamProvider: IStreamManager,
     @Inject(APPLICATION_CONFIG) config: ApplicationConfig,
   ) {
     this.streamProvider = streamProvider
@@ -122,6 +141,10 @@ export class ServerSentEventsController implements OnApplicationBootstrap, OnMod
   }
 
   @Get()
+  @ApiOperation({
+    summary: 'Subscribe to update notifications.',
+    description: 'Subscribe to update notifications via server-sent events.',
+  })
   public sse(@Res() response: Response): void {
     const clientId = generateClientId()
     const subject = new Subject<Event>()

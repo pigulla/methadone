@@ -6,6 +6,13 @@ export const serverConfig = z
   .strictObject({
     hostname: z.string().min(1),
     port: z.number().int().min(0),
+    apiKey: z.union([
+      z.literal(false),
+      z
+        .string()
+        .length(8)
+        .regex(/^[a-f0-9]+$/),
+    ]),
   })
   .readonly()
   .brand('server-config')

@@ -8,7 +8,7 @@ import {
 import { ExecaError, execa, type ResultPromise } from 'execa'
 
 import { type IPlayer } from '#application/player.interface.js'
-import { IStreamProvider } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-provider.interface.js'
 
 import {
   EXTERNAL_PLAYER_CONFIG,
@@ -18,12 +18,12 @@ import {
 @Injectable()
 export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger(ExternalPlayer.name)
-  private readonly streamProvider: IStreamProvider
+  private readonly streamProvider: IStreamManager
   private readonly config: ExternalPlayerConfig
   private player: { readonly process: ResultPromise; abortController: AbortController } | null
 
   public constructor(
-    streamProvider: IStreamProvider,
+    streamProvider: IStreamManager,
     @Inject(EXTERNAL_PLAYER_CONFIG) config: ExternalPlayerConfig,
   ) {
     this.streamProvider = streamProvider
@@ -35,8 +35,8 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
     await this.launch()
   }
 
-  public async onApplicationShutdown(_signal?: string): Promise<void> {
-    await this.terminate()
+  public onApplicationShutdown(_signal?: string): void {
+    this.terminate()
   }
 
   private async launch(): Promise<void> {
@@ -81,14 +81,13 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
     )
   }
 
-  private terminate(): Promise<void> {
-    return new Promise((resolve, _reject) => {
-      if (this.player === null) {
-        return resolve()
-      }
+  private terminate(): void {
+    if (this.player === null) {
+      return
+    }
 
-      this.logger.verbose({ processId: this.player.process.pid }, 'Terminating external player')
-      this.player.abortController.abort()
-    })
+    this.logger.verbose({ processId: this.player.process.pid }, 'Terminating external player')
+    this.player.abortController.abort()
+    this.player = null
   }
 }

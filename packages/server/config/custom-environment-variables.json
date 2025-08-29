@@ -1,5 +1,8 @@
 {
-    "application": {
-        "listeningKey": "LISTENING_KEY"
+    "server": {
+        "apiKey": "METHADONE_API_KEY"
+    },
+    "audioAddict": {
+        "listeningKey": "AUDIOADDICT_LISTENING_KEY"
     }
 }

@@ -1,11 +1,11 @@
 import { connect, type Socket } from 'node:net'
-import { PassThrough } from 'node:stream'
+import { PassThrough, type Writable } from 'node:stream'
 
 import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
-import { IStreamProvider } from '#application/stream-provider.interface.js'
+import { IStreamManager, type StreamInformation } from '#application/stream-provider.interface.js'
 import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
 import type { StreamEvent } from '#domain/event/stream/stream.event.js'
@@ -27,14 +27,15 @@ const suffixMap: Readonly<Record<AudioFormat, string>> = {
 // TODO: Find a better name for this thing.
 
 @Injectable()
-export class StreamProvider implements IStreamProvider, OnModuleDestroy {
-  public readonly stream: PassThrough
+export class StreamManager implements IStreamManager, OnModuleDestroy {
+  public readonly format: AudioFormat
 
-  private readonly logger = new Logger(StreamProvider.name)
+  private readonly logger = new Logger(StreamManager.name)
   private readonly networkRepository: INetworkRepository
   private readonly config: AudioAddictConfig
   private readonly moduleRef: ModuleRef
   private readonly eventEmitter: EventEmitter2
+  private readonly stream: PassThrough
 
   private active: {
     network: Network
@@ -49,6 +50,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     eventEmitter: EventEmitter2,
     moduleRef: ModuleRef,
   ) {
+    this.format = config.format
     this.networkRepository = networkRepository
     this.config = config
     this.eventEmitter = eventEmitter
@@ -73,7 +75,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     this.active = null
   }
 
-  public getInformation(): { track: string; network: Network; channel: Channel } | null {
+  public getInformation(): StreamInformation | null {
     return this.active
       ? {
           track: this.active.track,
@@ -94,7 +96,15 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
     this.eventEmitter.emit(event.name, event)
   }
 
-  public async start(channel: Channel): Promise<void> {
+  public streamTo(channel: Channel, stream: Writable): Promise<void> {
+    return this.connect(channel, stream)
+  }
+
+  public start(channel: Channel): Promise<void> {
+    return this.connect(channel, this.stream)
+  }
+
+  private async connect(channel: Channel, stream: Writable): Promise<void> {
     const path = `/${channel.key}${suffixMap[this.config.format]}?${this.config.listeningKey}`
     const [network, icecastTransformStream] = await Promise.all([
       this.networkRepository.getByID(channel.networkId),
@@ -105,7 +115,7 @@ export class StreamProvider implements IStreamProvider, OnModuleDestroy {
 
     // TODO: Get host/port from PLS file?
     const socket = connect(80, 'prem2.di.fm', () => {
-      socket.pipe(icecastTransformStream).pipe(this.stream)
+      socket.pipe(icecastTransformStream).pipe(stream)
       socket.write([`GET ${path} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join('\r\n'))
     })
 

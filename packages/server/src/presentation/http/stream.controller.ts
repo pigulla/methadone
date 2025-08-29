@@ -13,25 +13,39 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
 import type { Response } from 'express'
 import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
 import { IChannelService } from '#application/channel.service.interface.js'
-import { IStreamProvider } from '#application/stream-provider.interface.js'
+import { IStreamManager } from '#application/stream-provider.interface.js'
+import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import type { ChannelKey } from '#domain/channel/channel.js'
 import { channelKeySchema } from '#domain/channel/channel.schema.js'
 import type { NetworkKey } from '#domain/network/network.js'
 import { networkKeySchema } from '#domain/network/network.schema.js'
+import { ApiKeyGuard } from '#presentation/http/api-key.guard.js'
+
+const audioFormatMap: Readonly<Record<AudioFormat, string>> = {
+  [AUDIO_FORMAT.MP3_320]: 'audio/mpeg',
+  [AUDIO_FORMAT.AAC_128]: 'audio/aac',
+  [AUDIO_FORMAT.AAC_64]: 'audio/aac',
+}
 
 @Controller('stream')
+@UseGuards(ApiKeyGuard)
 @ApiTags('stream')
-@ApiSecurity({})
+@ApiSecurity('api-key')
 @ApiResponse({
   status: HttpStatus.BAD_REQUEST,
   description:
     'A query or route parameter, the payload or a header was malformed and did not pass validation.',
+})
+@ApiResponse({
+  status: HttpStatus.FORBIDDEN,
+  description: 'No suitable API key was provided by the client.',
 })
 @ApiResponse({
   status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -39,9 +53,9 @@ import { networkKeySchema } from '#domain/network/network.schema.js'
 })
 export class StreamController {
   private readonly channelService: IChannelService
-  private readonly streamProvider: IStreamProvider
+  private readonly streamProvider: IStreamManager
 
-  public constructor(channelService: IChannelService, streamProvider: IStreamProvider) {
+  public constructor(channelService: IChannelService, streamProvider: IStreamManager) {
     this.channelService = channelService
     this.streamProvider = streamProvider
   }
@@ -103,9 +117,9 @@ export class StreamController {
     channelKey: ChannelKey,
     @Res() response: Response,
   ): Promise<void> {
-    response.set('content-type', 'audio/aac')
+    response.set('content-type', audioFormatMap[this.streamProvider.format])
     const channel = await this.channelService.get(networkKey, channelKey)
-    // TODO: Implement me
+    await this.streamProvider.streamTo(channel, response)
   }
 
   @Post(':networkKey/:channelKey')
