@@ -1,7 +1,7 @@
 import { connect } from 'node:net'
 import type { Writable } from 'node:stream'
 
-import { Inject, Injectable, Logger, type OnApplicationShutdown } from '@nestjs/common'
+import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
@@ -26,7 +26,7 @@ const suffixMap: Readonly<Record<AudioFormat, string>> = {
 }
 
 @Injectable()
-export class StreamProvider implements IStreamProvider, OnApplicationShutdown {
+export class StreamProvider implements IStreamProvider, OnModuleDestroy {
   private readonly logger = new Logger(StreamProvider.name)
   private readonly networkRepository: INetworkRepository
   private readonly config: AudioAddictConfig
@@ -52,7 +52,7 @@ export class StreamProvider implements IStreamProvider, OnApplicationShutdown {
     this.active = null
   }
 
-  public onApplicationShutdown(_signal?: string): void {
+  public onModuleDestroy(): void {
     this.stop()
   }
 

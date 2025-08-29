@@ -23,6 +23,7 @@ const eventSource = createEventSource({
     track = null
   },
   onMessage(message: EventSourceMessage) {
+    console.warn(message.event)
     const event = eventSchema.parse(message)
     let hasTrackChanged = false
 
@@ -45,7 +46,7 @@ const eventSource = createEventSource({
     }
 
     if (hasTrackChanged && track !== null && network !== null && channel !== null) {
-      console.info(`${track} (${channel.name} on ${network.name}`)
+      console.info(`${track} (${channel.name} on ${network.name})`)
       execaSync('osascript', [
         '-e',
         `display notification ${JSON.stringify(track)} with title ${JSON.stringify(channel.name)} subtitle ${JSON.stringify(network.name)})`,

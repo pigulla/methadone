@@ -26,10 +26,7 @@ export async function bootstrap(): Promise<void> {
   const logger = app.get(Logger)
   const adapter = app.getHttpAdapter()
 
-  app
-    .enableShutdownHooks()
-    .useGlobalFilters(new EntityNotFoundExceptionFilter(adapter))
-    .useLogger(logger)
+  app.useGlobalFilters(new EntityNotFoundExceptionFilter(adapter)).useLogger(logger)
 
   if (openApi.swagger.enabled) {
     SwaggerModule.setup(openApi.swagger.path, app, () => createOpenAPIDocument(app, openApi))

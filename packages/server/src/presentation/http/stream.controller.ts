@@ -164,6 +164,15 @@ export class StreamController {
     })
     await this.streamProvider.streamTo(channel, process.stdin)
 
-    // TODO: Do we need to handle the case where launching the player fails?
+    process.catch(error => {
+      if (
+        error instanceof ExecaError &&
+        ['ERR_STREAM_PREMATURE_CLOSE', 'ECANCELED'].includes(error.code ?? '')
+      ) {
+        return
+      }
+
+      throw error
+    })
   }
 }
