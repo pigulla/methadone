@@ -5,7 +5,7 @@ import {
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
 } from '@nestjs/common'
-import { execa, type ResultPromise } from 'execa'
+import { ExecaError, execa, type ResultPromise } from 'execa'
 
 import { type IPlayer } from '#application/player.interface.js'
 import { IStreamProvider } from '#application/stream-provider.interface.js'
@@ -20,7 +20,7 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
   private readonly logger = new Logger(ExternalPlayer.name)
   private readonly streamProvider: IStreamProvider
   private readonly config: ExternalPlayerConfig
-  private process: ResultPromise | null
+  private player: { readonly process: ResultPromise; abortController: AbortController } | null
 
   public constructor(
     streamProvider: IStreamProvider,
@@ -28,7 +28,7 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
   ) {
     this.streamProvider = streamProvider
     this.config = config
-    this.process = null
+    this.player = null
   }
 
   public async onApplicationBootstrap(): Promise<void> {
@@ -45,39 +45,50 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
     this.logger.verbose({ path, options }, 'Launching external player')
 
     await new Promise<void>((resolve, _reject) => {
-      this.process = execa(path, options, {
-        input: this.streamProvider.stream,
-        reject: false,
-        killSignal: 'SIGTERM',
-        // TODO: Make stdout/stderr available for debugging?
-        stdout: 'ignore',
-        stderr: 'ignore',
-      })
+      const abortController = new AbortController()
+      this.player = {
+        abortController,
+        process: execa(path, options, {
+          cancelSignal: abortController.signal,
+          input: this.streamProvider.stream,
+          // TODO: Make stdout/stderr available for debugging?
+          stdout: 'ignore',
+          stderr: 'ignore',
+        }),
+      }
 
-      this.process.once('exit', (code: number | null, signal: NodeJS.Signals | null) => {
-        this.process = null
-        if (code === 0 || signal === 'SIGTERM') {
-          this.logger.debug({ code, signal }, 'External player terminated')
-        } else {
-          this.logger.warn({ code, signal }, 'External player exited abnormally')
+      abortController.signal.addEventListener(
+        'abort',
+        () => {
+          this.logger.debug('External player terminated')
+          this.player = null
+        },
+        { once: true },
+      )
+
+      this.player.process.catch(error => {
+        if (!(error instanceof ExecaError) || !error.isCanceled) {
+          throw error
         }
       })
-      this.process.once('spawn', () => resolve())
+
+      this.player.process.once('spawn', () => resolve())
     })
 
-    this.logger.debug({ processId: this.process?.pid }, 'External player launched successfully')
+    this.logger.debug(
+      { processId: this.player?.process.pid },
+      'External player launched successfully',
+    )
   }
 
   private terminate(): Promise<void> {
     return new Promise((resolve, _reject) => {
-      if (this.process === null) {
+      if (this.player === null) {
         return resolve()
       }
 
-      this.logger.verbose({ processId: this.process.pid }, 'Terminating external player')
-      this.process
-        .once('exit', (_code: number | null, _signal: NodeJS.Signals | null) => resolve())
-        .kill()
+      this.logger.verbose({ processId: this.player.process.pid }, 'Terminating external player')
+      this.player.abortController.abort()
     })
   }
 }
