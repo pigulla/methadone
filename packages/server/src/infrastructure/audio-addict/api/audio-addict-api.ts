@@ -1,7 +1,6 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common'
-import { type Got, got, type Options, type Response } from 'got'
-import ResponseLike from 'responselike'
-import type { JsonValue } from 'type-fest'
+import { Inject, Injectable } from '@nestjs/common'
+import { type Got, got } from 'got'
+import { KeyvFile } from 'keyv-file'
 
 import { Channel, type ChannelID } from '#domain/channel/channel.js'
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
@@ -9,7 +8,6 @@ import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js
 import { Network, type NetworkKey } from '#domain/network/network.js'
 import { IPlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.interface.js'
 
-import { ICache } from '../../cache/cache.interface.js'
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
 
 import type { IAudioAddictAPI } from './audio-addict-api.interface.js'
@@ -25,80 +23,24 @@ import { networksDtoSchema } from './dto/network.dto.js'
 @Injectable()
 export class AudioAddictAPI implements IAudioAddictAPI {
   private readonly config: AudioAddictConfig
-  private readonly cache: ICache<{ etag: string }>
   private readonly playlistParser: IPlaylistParser
   private readonly http: Got
 
   public constructor(
     @Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig,
     playlistParser: IPlaylistParser,
-    cache: ICache<{ etag: string }>,
   ) {
     this.config = config
-    this.cache = cache
     this.playlistParser = playlistParser
     this.http = got.extend({
-      hooks: config.useCache
-        ? {
-            beforeRequest: [
-              async (options: Options): Promise<void> => {
-                const cacheKey = options.context.cacheKey as string
-                const cached = await this.cache.get(cacheKey)
-
-                if (cached) {
-                  options.headers['if-none-match'] = cached.meta.etag
-                }
-              },
-            ],
-            afterResponse: [
-              async (response: Response): Promise<Response> => {
-                const cacheKey = response.request.options.context.cacheKey as string
-                const cached = await this.cache.get(cacheKey)
-                const isJSON = Boolean(response.request.options.context.isJSON)
-                if (cacheKey.includes('playlist')) debugger
-                if (response.statusCode === HttpStatus.NOT_MODIFIED && cached) {
-                  const rawBody = Buffer.from(
-                    isJSON ? JSON.stringify(cached.value) : (cached.value as string),
-                  )
-                  const cachedResponse = new ResponseLike({
-                    statusCode: HttpStatus.OK,
-                    url: response.url,
-                    headers: {},
-                    body: rawBody,
-                  }) as Response
-
-                  cachedResponse.request = response.request
-                  cachedResponse.rawBody = rawBody
-
-                  return cachedResponse
-                }
-
-                if (response.headers.etag) {
-                  const data = isJSON ? JSON.parse(response.body as string) : response.body
-                  await this.cache.set(cacheKey, data, {
-                    etag: response.headers.etag,
-                  })
-                }
-
-                return response
-              },
-            ],
-          }
-        : {},
+      cache: config.useCache ? new KeyvFile() : false,
     })
   }
 
   public async getCurrentlyPlaying(
     key: NetworkKey,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const value = await this.http
-      .get(`${this.config.baseUrl}/v1/${key}/currently_playing`, {
-        context: {
-          cacheKey: `${key}.currently-playing`,
-          isJSON: true,
-        },
-      })
-      .json()
+    const value = await this.http.get(`${this.config.baseUrl}/v1/${key}/currently_playing`).json()
 
     return new Map(
       currentlyPlayingDtoSchema.parse(value).map(
@@ -119,14 +61,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getNetworks(): Promise<Network[]> {
-    const data = await this.http
-      .get(`${this.config.baseUrl}/v1/networks`, {
-        context: {
-          cacheKey: 'networks',
-          isJSON: true,
-        },
-      })
-      .json()
+    const data = await this.http.get(`${this.config.baseUrl}/v1/networks`).json()
 
     return networksDtoSchema
       .parse(data)
@@ -143,14 +78,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getChannels(key: NetworkKey): Promise<Channel[]> {
-    const value = await this.http
-      .get(`${this.config.baseUrl}/v1/${key}/channels`, {
-        context: {
-          cacheKey: `${key}.channels`,
-          isJSON: true,
-        },
-      })
-      .json()
+    const value = await this.http.get(`${this.config.baseUrl}/v1/${key}/channels`).json()
 
     return channelsDtoSchema
       .parse(value)
@@ -168,14 +96,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getChannelFilters(key: NetworkKey): Promise<ChannelFilter[]> {
-    const value = await this.http
-      .get(`${this.config.baseUrl}/v1/${key}/channel_filters`, {
-        context: {
-          cacheKey: `${key}.channels-filters`,
-          isJSON: true,
-        },
-      })
-      .json()
+    const value = await this.http.get(`${this.config.baseUrl}/v1/${key}/channel_filters`).json()
 
     return channelFiltersDtoSchema
       .parse(value)
@@ -192,13 +113,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getStreamURL(network: Network, channel: Channel): Promise<string> {
-    const { body } = await this.http.get(`${network.listenUrl}/premium/${channel.key}.pls`, {
-      context: {
-        cacheKey: `${network.key}.${channel.key}.playlist`,
-        isJSON: false,
-      },
-    })
-    debugger
+    const { body } = await this.http.get(`${network.listenUrl}/premium/${channel.key}.pls`)
+
     const playlist = this.playlistParser.parse(body)
 
     if (playlist.length === 0) {

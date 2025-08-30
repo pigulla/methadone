@@ -1,5 +1,4 @@
 import { Module, Scope } from '@nestjs/common'
-import findCacheDirectory from 'find-cache-directory'
 
 import { IChannelService } from '#application/channel.service.interface.js'
 import { ChannelService } from '#application/channel.service.js'
@@ -15,11 +14,6 @@ import { PlaylistParser } from '#infrastructure/audio-addict/api/playlist/playli
 import { ICurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'
 import { CurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.js'
 import { DataImporter } from '#infrastructure/audio-addict/data-importer.js'
-import { ICache } from '#infrastructure/cache/cache.interface.js'
-import {
-  CACHE_DIRECTORY,
-  SimpleFileSystemCache,
-} from '#infrastructure/cache/simple-file-system-cache.js'
 import { IIcecastTransformStream } from '#infrastructure/stream/icecast-transform-stream.interface.js'
 import { IcecastTransformStream } from '#infrastructure/stream/icecast-transform-stream.js'
 import { StreamManager } from '#infrastructure/stream/stream-manager.js'
@@ -33,11 +27,6 @@ import { RepositoryModule } from './repository.module.js'
   providers: [
     { provide: IAudioAddictAPI, useClass: AudioAddictAPI },
     { provide: IPlaylistParser, useClass: PlaylistParser },
-    { provide: ICache, useClass: SimpleFileSystemCache },
-    {
-      provide: CACHE_DIRECTORY,
-      useValue: findCacheDirectory({ name: '@methadone/server', create: true }),
-    },
     DataImporter,
     { provide: ICurrentlyPlayingUpdater, useClass: CurrentlyPlayingUpdater },
     {
