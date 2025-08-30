@@ -9,8 +9,8 @@ import type { ICache } from './cache.interface.js'
 export const CACHE_DIRECTORY = Symbol('cache-directory')
 
 @Injectable()
-export class FileSystemCache<M extends JsonObject> implements ICache<M> {
-  private readonly logger = new Logger(FileSystemCache.name)
+export class SimpleFileSystemCache<M extends JsonObject> implements ICache<M> {
+  private readonly logger = new Logger(SimpleFileSystemCache.name)
   private readonly cacheDirectory: string
 
   public constructor(@Inject(CACHE_DIRECTORY) cacheDirectory: string) {

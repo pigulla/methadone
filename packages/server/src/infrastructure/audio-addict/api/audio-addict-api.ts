@@ -54,13 +54,16 @@ export class AudioAddictAPI implements IAudioAddictAPI {
               async (response: Response): Promise<Response> => {
                 const cacheKey = response.request.options.context.cacheKey as string
                 const cached = await this.cache.get(cacheKey)
-
+                const isJSON = Boolean(response.request.options.context.isJSON)
+                if (cacheKey.includes('playlist')) debugger
                 if (response.statusCode === HttpStatus.NOT_MODIFIED && cached) {
-                  const rawBody = Buffer.from(JSON.stringify(cached.value))
+                  const rawBody = Buffer.from(
+                    isJSON ? JSON.stringify(cached.value) : (cached.value as string),
+                  )
                   const cachedResponse = new ResponseLike({
                     statusCode: HttpStatus.OK,
                     url: response.url,
-                    headers: { 'content-type': 'application/json' },
+                    headers: {},
                     body: rawBody,
                   }) as Response
 
@@ -71,7 +74,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
                 }
 
                 if (response.headers.etag) {
-                  await this.cache.set(cacheKey, JSON.parse(response.body as string) as JsonValue, {
+                  const data = isJSON ? JSON.parse(response.body as string) : response.body
+                  await this.cache.set(cacheKey, data, {
                     etag: response.headers.etag,
                   })
                 }
@@ -91,6 +95,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       .get(`${this.config.baseUrl}/v1/${key}/currently_playing`, {
         context: {
           cacheKey: `${key}.currently-playing`,
+          isJSON: true,
         },
       })
       .json()
@@ -118,6 +123,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       .get(`${this.config.baseUrl}/v1/networks`, {
         context: {
           cacheKey: 'networks',
+          isJSON: true,
         },
       })
       .json()
@@ -141,6 +147,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       .get(`${this.config.baseUrl}/v1/${key}/channels`, {
         context: {
           cacheKey: `${key}.channels`,
+          isJSON: true,
         },
       })
       .json()
@@ -165,6 +172,7 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       .get(`${this.config.baseUrl}/v1/${key}/channel_filters`, {
         context: {
           cacheKey: `${key}.channels-filters`,
+          isJSON: true,
         },
       })
       .json()
@@ -187,9 +195,10 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     const { body } = await this.http.get(`${network.listenUrl}/premium/${channel.key}.pls`, {
       context: {
         cacheKey: `${network.key}.${channel.key}.playlist`,
+        isJSON: false,
       },
     })
-
+    debugger
     const playlist = this.playlistParser.parse(body)
 
     if (playlist.length === 0) {
