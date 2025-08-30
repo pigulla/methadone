@@ -2,7 +2,8 @@
     "server": {
         "hostname": "localhost",
         "port": 3000,
-        "apiKey": false
+        "apiKey": false,
+        "enableCors": true
     },
     "logging": {
         "enabled": true,

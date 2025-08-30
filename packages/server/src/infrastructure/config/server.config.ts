@@ -13,6 +13,7 @@ export const serverConfig = z
         .length(8)
         .regex(/^[a-f0-9]+$/),
     ]),
+    enableCors: z.boolean(),
   })
   .readonly()
   .brand('server-config')

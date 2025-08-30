@@ -18,7 +18,6 @@ dayjs.extend(objectSupportPlugin)
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(MainModule, {
     bufferLogs: false,
-    cors: { origin: '*' },
   })
 
   const server = app.get<ServerConfig>(SERVER_CONFIG)
@@ -28,6 +27,9 @@ export async function bootstrap(): Promise<void> {
 
   app.useGlobalFilters(new EntityNotFoundExceptionFilter(adapter)).useLogger(logger)
 
+  if (server.enableCors) {
+    app.enableCors()
+  }
   if (openApi.swagger.enabled) {
     SwaggerModule.setup(openApi.swagger.path, app, () => createOpenAPIDocument(app, openApi))
   }
