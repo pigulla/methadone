@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { type Got, got } from 'got'
 import { KeyvFile } from 'keyv-file'
+import type { JsonValue } from 'type-fest'
 
 import { Channel, type ChannelID } from '#domain/channel/channel.js'
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { Network, type NetworkKey } from '#domain/network/network.js'
-import { IPlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.interface.js'
+import { listenUrlsDtoSchema } from '#infrastructure/audio-addict/api/dto/listen-urls.dto.js'
 
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
 
@@ -22,28 +23,22 @@ import { networksDtoSchema } from './dto/network.dto.js'
 
 @Injectable()
 export class AudioAddictAPI implements IAudioAddictAPI {
-  private readonly config: AudioAddictConfig
-  private readonly playlistParser: IPlaylistParser
   private readonly http: Got
 
-  public constructor(
-    @Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig,
-    playlistParser: IPlaylistParser,
-  ) {
-    this.config = config
-    this.playlistParser = playlistParser
+  public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig) {
     this.http = got.extend({
       cache: config.useCache ? new KeyvFile() : false,
+      prefixUrl: config.baseUrl,
     })
   }
 
   public async getCurrentlyPlaying(
     key: NetworkKey,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const value = await this.http.get(`${this.config.baseUrl}/v1/${key}/currently_playing`).json()
+    const response = await this.http.get(`v1/${key}/currently_playing`).json<JsonValue>()
 
     return new Map(
-      currentlyPlayingDtoSchema.parse(value).map(
+      currentlyPlayingDtoSchema.parse(response).map(
         ({ channel_id, track }) =>
           [
             channel_id,
@@ -61,10 +56,10 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getNetworks(): Promise<Network[]> {
-    const data = await this.http.get(`${this.config.baseUrl}/v1/networks`).json()
+    const response = await this.http.get('v1/networks').json<JsonValue>()
 
     return networksDtoSchema
-      .parse(data)
+      .parse(response)
       .filter(network => network.active)
       .map(({ id, key, name, url, listen_url }) =>
         Network.create({
@@ -78,10 +73,10 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getChannels(key: NetworkKey): Promise<Channel[]> {
-    const value = await this.http.get(`${this.config.baseUrl}/v1/${key}/channels`).json()
+    const response = await this.http.get(`v1/${key}/channels`).json<JsonValue>()
 
     return channelsDtoSchema
-      .parse(value)
+      .parse(response)
       .map(({ id, key, network_id, name, channel_director, description, similar_channels }) =>
         Channel.create({
           id,
@@ -96,10 +91,10 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getChannelFilters(key: NetworkKey): Promise<ChannelFilter[]> {
-    const value = await this.http.get(`${this.config.baseUrl}/v1/${key}/channel_filters`).json()
+    const response = await this.http.get(`v1/${key}/channel_filters`).json<JsonValue>()
 
     return channelFiltersDtoSchema
-      .parse(value)
+      .parse(response)
       .map(({ id, key, network_id, name, position, channels }) =>
         ChannelFilter.create({
           id,
@@ -113,14 +108,10 @@ export class AudioAddictAPI implements IAudioAddictAPI {
   }
 
   public async getStreamURL(network: Network, channel: Channel): Promise<string> {
-    const { body } = await this.http.get(`${network.listenUrl}/premium/${channel.key}.pls`)
+    const response = await this.http
+      .get(`v1/${network.key}/listen/premium/${channel.key}`)
+      .json<JsonValue>()
 
-    const playlist = this.playlistParser.parse(body)
-
-    if (playlist.length === 0) {
-      throw new Error('Empty playlist received')
-    }
-
-    return playlist[0].file
+    return listenUrlsDtoSchema.parse(response)[0]
   }
 }

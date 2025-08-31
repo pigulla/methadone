@@ -9,8 +9,6 @@ import { NetworkService } from '#application/network.service.js'
 import { IStreamManager } from '#application/stream-manager.interface.js'
 import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 import { AudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.js'
-import { IPlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.interface.js'
-import { PlaylistParser } from '#infrastructure/audio-addict/api/playlist/playlist-parser.js'
 import { ICurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.interface.js'
 import { CurrentlyPlayingUpdater } from '#infrastructure/audio-addict/currently-playing/currently-playing-updater.js'
 import { DataImporter } from '#infrastructure/audio-addict/data-importer.js'
@@ -26,7 +24,6 @@ import { RepositoryModule } from './repository.module.js'
   imports: [RepositoryModule, ConfigModule, DatabaseModule],
   providers: [
     { provide: IAudioAddictAPI, useClass: AudioAddictAPI },
-    { provide: IPlaylistParser, useClass: PlaylistParser },
     DataImporter,
     { provide: ICurrentlyPlayingUpdater, useClass: CurrentlyPlayingUpdater },
     {
@@ -45,7 +42,6 @@ import { RepositoryModule } from './repository.module.js'
       provide: IStreamManager,
       useClass: StreamManager,
     },
-
     { provide: IIcecastTransformStream, useClass: IcecastTransformStream, scope: Scope.TRANSIENT },
   ],
   exports: [INetworkService, IChannelService, IChannelFilterService, IStreamManager],

@@ -98,6 +98,7 @@
         "@types/express": "5.0.3",
         "@types/ini": "4.1.1",
         "@types/supertest": "6.0.3",
+        "glob": "11.0.3",
         "pino-pretty": "13.1.1",
         "sql-formatter": "15.6.6",
         "supertest": "7.1.4",

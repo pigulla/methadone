@@ -10,6 +10,7 @@ import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js
 import type { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import type { NetworkID } from '#domain/network/network.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
+import { dayjsToTimestampTZ } from '#infrastructure/persistence/dayjs-to-timestamptz.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
 import { IDatabase } from '../database.interface.js'
@@ -86,21 +87,7 @@ export class CurrentlyPlayingRepository
         channel_id: channelId,
         artist: currentlyPlaying ? currentlyPlaying.artist : null,
         title: currentlyPlaying ? currentlyPlaying.title : null,
-        started_at: currentlyPlaying
-          ? timestampTZValue({
-              date: {
-                year: currentlyPlaying.startedAt.year(),
-                month: currentlyPlaying.startedAt.month(),
-                day: currentlyPlaying.startedAt.day(),
-              },
-              time: {
-                hour: currentlyPlaying.startedAt.hour(),
-                min: currentlyPlaying.startedAt.minute(),
-                sec: currentlyPlaying.startedAt.second(),
-                micros: 0,
-              },
-            })
-          : null,
+        started_at: currentlyPlaying ? dayjsToTimestampTZ(currentlyPlaying.startedAt) : null,
         duration: currentlyPlaying
           ? intervalValue(
               0,

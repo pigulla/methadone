@@ -10,8 +10,6 @@ import { INetworkRepository } from '#domain/network/network.repository.interface
 
 import { IAudioAddictAPI } from './api/audio-addict-api.interface.js'
 
-// TODO: Use Appender? Docs say it's not implemented for JS but there's a DuckDBConnection.createAppender function?
-
 @Injectable()
 export class DataImporter implements OnModuleInit {
   private readonly logger = new Logger(DataImporter.name)
@@ -38,9 +36,10 @@ export class DataImporter implements OnModuleInit {
     const networks = await this.loadNetworks()
     await this.loadChannels(networks)
     await this.loadChannelFilters(networks)
-    const seconds = start.diff(dayjs(), 'seconds')
 
-    this.logger.log(`Successfully imported AudioAddict data (took ${seconds.toFixed(1)} seconds)`)
+    this.logger.log(
+      `Successfully imported AudioAddict data (took ${start.diff(dayjs(), 'seconds').toFixed(1)} seconds)`,
+    )
   }
 
   private async loadNetworks(): Promise<Network[]> {

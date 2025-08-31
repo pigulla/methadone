@@ -30,6 +30,7 @@ const suffixMap: Readonly<Record<AudioFormat, string>> = {
 @Injectable()
 export class StreamManager implements IStreamManager, OnModuleDestroy {
   public readonly format: AudioFormat
+  public readonly stream: PassThrough
 
   private readonly logger = new Logger(StreamManager.name)
   private readonly audioAddictApi: IAudioAddictAPI
@@ -37,7 +38,6 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
   private readonly config: AudioAddictConfig
   private readonly moduleRef: ModuleRef
   private readonly eventEmitter: EventEmitter2
-  private readonly stream: PassThrough
 
   private active: {
     network: Network

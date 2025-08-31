@@ -7,15 +7,11 @@ import {
   type OnApplicationBootstrap,
   type OnModuleDestroy,
 } from '@nestjs/common'
-import type { Duration } from 'dayjs/plugin/duration.js'
 
 import { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
-import {
-  AUDIO_ADDICT_CONFIG,
-  type AudioAddictConfig,
-} from '#infrastructure/config/audio-addict.config.js'
 
+import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
 import { IAudioAddictAPI } from '../api/audio-addict-api.interface.js'
 
 import type { ICurrentlyPlayingUpdater } from './currently-playing-updater.interface.js'
@@ -25,7 +21,7 @@ export class CurrentlyPlayingUpdater
   implements ICurrentlyPlayingUpdater, OnApplicationBootstrap, OnModuleDestroy
 {
   private readonly logger = new Logger(CurrentlyPlayingUpdater.name)
-  private readonly intervalDuration: Duration
+  private readonly config: AudioAddictConfig
   private readonly api: IAudioAddictAPI
   private readonly networkRepository: INetworkRepository
   private readonly nowPlayingRepository: ICurrentlyPlayingRepository
@@ -37,7 +33,7 @@ export class CurrentlyPlayingUpdater
     networkRepository: INetworkRepository,
     repository: ICurrentlyPlayingRepository,
   ) {
-    this.intervalDuration = config.currentlyPlayingRefreshInterval
+    this.config = config
     this.api = api
     this.networkRepository = networkRepository
     this.nowPlayingRepository = repository
@@ -47,9 +43,12 @@ export class CurrentlyPlayingUpdater
   public async onApplicationBootstrap(): Promise<void> {
     await this.update()
 
-    // if (this.intervalId === null) {
-    //   this.intervalId = setInterval(() => this.update(), this.intervalDuration.asMilliseconds())
-    // }
+    if (this.intervalId === null) {
+      this.intervalId = setInterval(
+        () => this.update(),
+        this.config.currentlyPlayingRefreshInterval.asMilliseconds(),
+      )
+    }
   }
 
   public onModuleDestroy(): void {
