@@ -7,7 +7,7 @@ SELECT
   COALESCE(
     (
       SELECT
-        JSON_GROUP_ARRAY(channels.id)
+        JSON_AGG (channels.id)
       FROM
         channels_to_channel_filters
         JOIN channels ON channels.id = channels_to_channel_filters.channel_id
@@ -19,4 +19,4 @@ SELECT
 FROM
   channel_filters
 WHERE
-  channel_filters.id = $id;
+  channel_filters.id = $1;

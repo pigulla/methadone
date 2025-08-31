@@ -21,7 +21,7 @@ export abstract class AbstractRepository<T extends string[]> implements OnModule
   }
 
   public async onModuleInit(): Promise<void> {
-    this.statements = await prepareStatements(this.database.db, this.directory, this.fileNames)
+    this.statements = await prepareStatements(this.directory, this.fileNames)
   }
 
   protected get stmt(): PreparedStatements<T> {

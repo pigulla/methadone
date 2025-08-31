@@ -21,7 +21,6 @@ export class ChannelRepository
       'get-all-for-network',
       'get-one-by-key',
       'insert',
-      'update',
       'insert-similar-channel',
     ]
   >
@@ -36,17 +35,13 @@ export class ChannelRepository
         'get-all-for-network',
         'get-one-by-key',
         'insert',
-        'update',
         'insert-similar-channel',
       ],
     })
   }
 
   public async getByID(channelId: ChannelID): Promise<Channel> {
-    const stmt = this.stmt.GET_ONE
-
-    stmt.bind({ id: channelId })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE, [channelId])
 
     if (rows.length === 0) {
       throw new ChannelNotFoundError(channelId)
@@ -56,10 +51,10 @@ export class ChannelRepository
   }
 
   public async getByKeyForNetwork(networkId: NetworkID, channelKey: ChannelKey): Promise<Channel> {
-    const stmt = this.stmt.GET_ONE_BY_KEY
-
-    stmt.bind({ network_id: networkId, key: channelKey })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE_BY_KEY, [
+      networkId,
+      channelKey,
+    ])
 
     if (rows.length === 0) {
       throw new ChannelNotFoundError(channelKey)
@@ -69,34 +64,28 @@ export class ChannelRepository
   }
 
   public async getAll(): Promise<Channel[]> {
-    const stmt = this.stmt.GET_ALL
-
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL, [])
 
     return rows.map(row => channelsViewRow.parse(row).toDomain())
   }
 
   public async getAllForNetwork(networkId: NetworkID): Promise<Channel[]> {
-    const stmt = this.stmt.GET_ALL_FOR_NETWORK
-    stmt.bind({ network_id: networkId })
-
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL_FOR_NETWORK, [
+      networkId,
+    ])
 
     return rows.map(row => channelsViewRow.parse(row).toDomain())
   }
 
   public async insert(channel: Channel): Promise<Channel> {
-    // TODO: Handle FK violations and duplicate key errors
-    const stmt = this.stmt.INSERT
-    stmt.bind({
-      id: channel.id,
-      key: channel.key,
-      name: channel.name,
-      network_id: channel.networkId,
-      description: channel.description,
-      director: channel.director,
-    })
-    await stmt.run()
+    await this.database.instance.query<unknown>(this.stmt.INSERT, [
+      channel.id,
+      channel.key,
+      channel.networkId,
+      channel.name,
+      channel.description,
+      channel.director,
+    ])
 
     await this.setSimilar(channel)
 
@@ -104,11 +93,11 @@ export class ChannelRepository
   }
 
   private async setSimilar(channel: Channel): Promise<void> {
-    const insertStmt = this.stmt.INSERT_SIMILAR_CHANNEL
-
     for (const similarChannelID of channel.similar) {
-      insertStmt.bind({ channel_id: channel.id, similar_channel_id: similarChannelID })
-      await insertStmt.run()
+      await this.database.instance.query<unknown>(this.stmt.INSERT_SIMILAR_CHANNEL, [
+        channel.id,
+        similarChannelID,
+      ])
     }
   }
 }

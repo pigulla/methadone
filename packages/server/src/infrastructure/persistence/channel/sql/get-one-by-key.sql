@@ -9,5 +9,5 @@ SELECT
 FROM
   view_channels
 WHERE
-  network_id = $network_id
-  AND key = $key;
+  network_id = $1
+  AND key = $2;

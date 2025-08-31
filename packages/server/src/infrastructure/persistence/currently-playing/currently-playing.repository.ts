@@ -1,7 +1,5 @@
 import { join } from 'node:path'
 
-import { intervalValue, TIMESTAMPTZ, timestampTZValue, UINTEGER, VARCHAR } from '@duckdb/node-api'
-import { INTERVAL, SQLNULL } from '@duckdb/node-api/lib/DuckDBType.js'
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 
 import type { ChannelID } from '#domain/channel/channel.js'
@@ -10,7 +8,6 @@ import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js
 import type { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import type { NetworkID } from '#domain/network/network.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
-import { dayjsToTimestampTZ } from '#infrastructure/persistence/dayjs-to-timestamptz.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
 import { IDatabase } from '../database.interface.js'
@@ -30,31 +27,27 @@ export class CurrentlyPlayingRepository
   }
 
   public async deleteAll(): Promise<void> {
-    await this.stmt.DELETE_ALL.run()
+    await this.database.instance.query(this.stmt.DELETE_ALL)
   }
 
-  public async get(id: ChannelID): Promise<CurrentlyPlaying | null> {
-    const stmt = this.stmt.GET_ONE
-
-    stmt.bind({ channel_id: id })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
-
+  public async get(channelId: ChannelID): Promise<CurrentlyPlaying | null> {
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE, [channelId])
+    console.dir(rows)
     if (rows.length === 0) {
-      throw new ChannelNotFoundError(id)
+      throw new ChannelNotFoundError(channelId)
     }
 
     return currentlyPlayingRow.parse(rows[0]).toDomain()
   }
 
-  public async getForNetwork(id: NetworkID): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const stmt = this.stmt.GET_ALL_FOR_NETWORK
-
-    stmt.bind({ network_id: id })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+  public async getForNetwork(
+    networkId: NetworkID,
+  ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE, [networkId])
 
     if (rows.length === 0) {
       // Theoretically there could of course be networks with no channels, but in practice that's not going to happen.
-      throw new NetworkNotFoundError(id)
+      throw new NetworkNotFoundError(networkId)
     }
 
     return new Map(
@@ -65,9 +58,7 @@ export class CurrentlyPlayingRepository
   }
 
   public async getAll(): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const stmt = this.stmt.GET_ALL
-
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL, [])
 
     return new Map(
       rows
@@ -80,31 +71,12 @@ export class CurrentlyPlayingRepository
     channelId: ChannelID,
     currentlyPlaying: CurrentlyPlaying | null,
   ): Promise<void> {
-    const stmt = this.stmt.UPSERT
-
-    stmt.bind(
-      {
-        channel_id: channelId,
-        artist: currentlyPlaying ? currentlyPlaying.artist : null,
-        title: currentlyPlaying ? currentlyPlaying.title : null,
-        started_at: currentlyPlaying ? dayjsToTimestampTZ(currentlyPlaying.startedAt) : null,
-        duration: currentlyPlaying
-          ? intervalValue(
-              0,
-              0,
-              BigInt(currentlyPlaying.duration.asMilliseconds().toFixed(0)) * 1000n,
-            )
-          : null,
-      },
-      {
-        channel_id: UINTEGER,
-        artist: currentlyPlaying ? VARCHAR : SQLNULL,
-        title: currentlyPlaying ? VARCHAR : SQLNULL,
-        started_at: currentlyPlaying ? TIMESTAMPTZ : SQLNULL,
-        duration: currentlyPlaying ? INTERVAL : SQLNULL,
-      },
-    )
-
-    await stmt.run()
+    await this.database.instance.query<unknown>(this.stmt.UPSERT, [
+      channelId,
+      currentlyPlaying ? currentlyPlaying.artist : null,
+      currentlyPlaying ? currentlyPlaying.title : null,
+      currentlyPlaying ? currentlyPlaying.startedAt.toISOString() : null,
+      currentlyPlaying ? currentlyPlaying.duration.asSeconds() : null,
+    ])
   }
 }

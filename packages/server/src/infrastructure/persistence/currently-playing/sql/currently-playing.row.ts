@@ -1,5 +1,3 @@
-import { DuckDBIntervalValue } from '@duckdb/node-api/lib/values/DuckDBIntervalValue.js'
-import { DuckDBTimestampTZValue } from '@duckdb/node-api/lib/values/DuckDBTimestampTZValue.js'
 import dayjs from 'dayjs'
 import z from 'zod'
 
@@ -13,20 +11,14 @@ export const currentlyPlayingRow = z
       artist: z.string(),
       title: z.string(),
       started_at: z
-        .instanceof(DuckDBTimestampTZValue)
-        .transform(value => {
-          const { date, time } = value.toParts()
-          return dayjs({
-            ...date,
-            hour: time.hour,
-            minute: time.min,
-            second: time.sec,
-          })
-        })
+        .instanceof(Date)
+        .transform(value => dayjs(value))
         .refine(value => value.isValid()),
       duration: z
-        .instanceof(DuckDBIntervalValue)
-        .transform(value => dayjs.duration(Number(value.micros / 1000000n), 'seconds')),
+        .number()
+        .int()
+        .min(0)
+        .transform(value => dayjs.duration(value, 'seconds')),
     }),
     z.strictObject({
       channel_id: channelIdSchema,

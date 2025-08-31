@@ -7,4 +7,4 @@ SELECT
 FROM
   networks
 WHERE
-  id = $id;
+  id = $1;

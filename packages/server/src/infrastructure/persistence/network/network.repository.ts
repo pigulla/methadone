@@ -23,53 +23,42 @@ export class NetworkRepository
     })
   }
 
-  public async getByID(id: NetworkID): Promise<Network> {
-    const stmt = this.stmt.GET_ONE
-
-    stmt.bind({ id })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+  public async getByID(networkId: NetworkID): Promise<Network> {
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE, [networkId])
 
     if (rows.length === 0) {
-      throw new NetworkNotFoundError(id)
+      throw new NetworkNotFoundError(networkId)
     }
 
     return networksRow.parse(rows[0]).toDomain()
   }
 
-  public async getByKey(key: NetworkKey): Promise<Network> {
-    const stmt = this.stmt.GET_ONE_BY_KEY
-
-    stmt.bind({ key })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+  public async getByKey(channelKey: NetworkKey): Promise<Network> {
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE_BY_KEY, [
+      channelKey,
+    ])
 
     if (rows.length === 0) {
-      throw new NetworkNotFoundError(key)
+      throw new NetworkNotFoundError(channelKey)
     }
 
     return networksRow.parse(rows[0]).toDomain()
   }
 
   public async getAll(): Promise<Network[]> {
-    const stmt = this.stmt.GET_ALL
-
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL, [])
 
     return rows.map(row => networksRow.parse(row).toDomain())
   }
 
   public async insert(network: Network): Promise<Network> {
-    const stmt = this.stmt.INSERT
-
-    stmt.bind({
-      id: network.id,
-      key: network.key,
-      name: network.name,
-      url: network.url,
-      listen_url: network.listenUrl,
-    })
-
-    // TODO: Handle FK violations and duplicate key errors
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.INSERT, [
+      network.id,
+      network.key,
+      network.name,
+      network.url,
+      network.listenUrl,
+    ])
 
     return networksRow.parse(rows[0]).toDomain()
   }

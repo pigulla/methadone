@@ -149,7 +149,7 @@ export class NetworkController {
         ? {
             ...currentlyPlaying,
             startedAt: currentlyPlaying.startedAt.toISOString(),
-            duration: currentlyPlaying.duration.asSeconds(),
+            endsAt: currentlyPlaying.startedAt.add(currentlyPlaying.duration).toISOString(),
           }
         : null,
     )

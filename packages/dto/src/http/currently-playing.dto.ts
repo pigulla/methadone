@@ -7,7 +7,7 @@ export const currentlyPlayingDtoSchema = z.object({
       artist: z.string(),
       title: z.string(),
       startedAt: z.iso.datetime(),
-      duration: z.number().int().min(0),
+      endsAt: z.iso.datetime(),
     })
     .nullable(),
 })
@@ -19,7 +19,7 @@ export function createCurrentlyPlayingDTO(
     artist: string
     title: string
     startedAt: string
-    duration: number
+    endsAt: string
   } | null,
 ): CurrentlyPlayingDTO {
   return CurrentlyPlayingDTO.create({
@@ -28,7 +28,7 @@ export function createCurrentlyPlayingDTO(
           artist: data.artist,
           title: data.title,
           startedAt: data.startedAt,
-          duration: data.duration,
+          endsAt: data.endsAt,
         }
       : null,
   })

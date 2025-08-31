@@ -1,5 +1,5 @@
-import type { DuckDBConnection } from '@duckdb/node-api'
+import { PGlite } from '@electric-sql/pglite'
 
 export abstract class IDatabase {
-  public abstract db: DuckDBConnection
+  public abstract readonly instance: PGlite
 }

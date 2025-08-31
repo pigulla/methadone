@@ -1,5 +1,5 @@
 CREATE TABLE networks (
-  id UINTEGER PRIMARY KEY NOT NULL,
+  id INTEGER PRIMARY KEY NOT NULL CHECK (id > 0),
   key VARCHAR UNIQUE NOT NULL,
   name VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
@@ -7,8 +7,8 @@ CREATE TABLE networks (
 );
 
 CREATE TABLE channels (
-  id UINTEGER PRIMARY KEY NOT NULL,
-  network_id UINTEGER REFERENCES networks (id) NOT NULL,
+  id INTEGER PRIMARY KEY NOT NULL CHECK (id > 0),
+  network_id INTEGER REFERENCES networks (id) NOT NULL,
   key VARCHAR NOT NULL,
   name VARCHAR NOT NULL,
   description VARCHAR NOT NULL,
@@ -17,14 +17,16 @@ CREATE TABLE channels (
 );
 
 CREATE TABLE similar_channels (
-  channel_id UINTEGER REFERENCES channels (id) NOT NULL,
-  similar_channel_id UINTEGER CHECK (channel_id <> similar_channel_id) NOT NULL,
-  PRIMARY KEY (channel_id, similar_channel_id),
+  channel_id INTEGER REFERENCES channels (id) NOT NULL,
+  similar_channel_id INTEGER CHECK (channel_id <> similar_channel_id) NOT NULL,
+  -- TODO: FIXME
+  -- similar_channel_id INTEGER REFERENCES channels (id) DEFERRABLE INITIALLY IMMEDIATE CHECK (channel_id <> similar_channel_id) NOT NULL,
+  PRIMARY KEY (channel_id, similar_channel_id)
 );
 
 CREATE TABLE channel_filters (
-  id UINTEGER PRIMARY KEY NOT NULL,
-  network_id UINTEGER REFERENCES networks (id) NOT NULL,
+  id INTEGER PRIMARY KEY NOT NULL CHECK (id > 0),
+  network_id INTEGER REFERENCES networks (id) NOT NULL,
   key VARCHAR NOT NULL,
   name VARCHAR NOT NULL,
   position INTEGER NOT NULL,
@@ -33,13 +35,13 @@ CREATE TABLE channel_filters (
 );
 
 CREATE TABLE channels_to_channel_filters (
-  channel_id UINTEGER REFERENCES channels (id) NOT NULL,
-  channel_filter_id UINTEGER REFERENCES channel_filters (id) NOT NULL,
-  PRIMARY KEY (channel_id, channel_filter_id),
+  channel_id INTEGER REFERENCES channels (id) NOT NULL,
+  channel_filter_id INTEGER REFERENCES channel_filters (id) NOT NULL,
+  PRIMARY KEY (channel_id, channel_filter_id)
 );
 
 CREATE TABLE currently_playing (
-  channel_id UINTEGER REFERENCES channels (id) PRIMARY KEY NOT NULL,
+  channel_id INTEGER REFERENCES channels (id) PRIMARY KEY NOT NULL,
   artist VARCHAR NULL,
   title VARCHAR NULL,
   started_at TIMESTAMPTZ NULL,
@@ -71,14 +73,13 @@ SELECT
   COALESCE(
     (
       SELECT
-        JSON_GROUP_ARRAY(similar_channels.similar_channel_id)
+        JSON_AGG (similar_channels.similar_channel_id)
       FROM
         similar_channels
-        JOIN channels ON channels.id = similar_channels.channel_id
       WHERE
         similar_channels.channel_id = channels.id
     ),
-    '[]'
+    '[]'::JSON
   ) AS similar_channels
 FROM
   channels;

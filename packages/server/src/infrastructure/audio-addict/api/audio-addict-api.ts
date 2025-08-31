@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { type Got, got } from 'got'
-import { KeyvFile } from 'keyv-file'
 import type { JsonValue } from 'type-fest'
 
 import { Channel, type ChannelID } from '#domain/channel/channel.js'
@@ -27,15 +26,15 @@ export class AudioAddictAPI implements IAudioAddictAPI {
 
   public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig) {
     this.http = got.extend({
-      cache: config.useCache ? new KeyvFile() : false,
+      cache: config.useCache ? new Map() : false,
       prefixUrl: config.baseUrl,
     })
   }
 
   public async getCurrentlyPlaying(
-    key: NetworkKey,
+    networkKey: NetworkKey,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const response = await this.http.get(`v1/${key}/currently_playing`).json<JsonValue>()
+    const response = await this.http.get(`v1/${networkKey}/currently_playing`).json<JsonValue>()
 
     return new Map(
       currentlyPlayingDtoSchema.parse(response).map(
@@ -72,8 +71,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       )
   }
 
-  public async getChannels(key: NetworkKey): Promise<Channel[]> {
-    const response = await this.http.get(`v1/${key}/channels`).json<JsonValue>()
+  public async getChannels(networkKey: NetworkKey): Promise<Channel[]> {
+    const response = await this.http.get(`v1/${networkKey}/channels`).json<JsonValue>()
 
     return channelsDtoSchema
       .parse(response)
@@ -90,8 +89,8 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       )
   }
 
-  public async getChannelFilters(key: NetworkKey): Promise<ChannelFilter[]> {
-    const response = await this.http.get(`v1/${key}/channel_filters`).json<JsonValue>()
+  public async getChannelFilters(networkKey: NetworkKey): Promise<ChannelFilter[]> {
+    const response = await this.http.get(`v1/${networkKey}/channel_filters`).json<JsonValue>()
 
     return channelFiltersDtoSchema
       .parse(response)

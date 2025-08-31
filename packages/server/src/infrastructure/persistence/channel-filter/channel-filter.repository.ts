@@ -37,14 +37,13 @@ export class ChannelFilterRepository
     })
   }
 
-  public async getByID(id: ChannelFilterID): Promise<ChannelFilter> {
-    const stmt = this.stmt.GET_ONE
-
-    stmt.bind({ id })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+  public async getByID(channelFilterId: ChannelFilterID): Promise<ChannelFilter> {
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE, [
+      channelFilterId,
+    ])
 
     if (rows.length === 0) {
-      throw new ChannelFilterNotFoundError(id)
+      throw new ChannelFilterNotFoundError(channelFilterId)
     }
 
     return channelFiltersRow.parse(rows[0]).toDomain()
@@ -52,55 +51,49 @@ export class ChannelFilterRepository
 
   public async getByKeyForNetwork(
     networkId: NetworkID,
-    key: ChannelFilterKey,
+    channelFilterKey: ChannelFilterKey,
   ): Promise<ChannelFilter> {
-    const stmt = this.stmt.GET_ONE_BY_KEY
-
-    stmt.bind({ network_id: networkId, key })
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE_BY_KEY, [
+      networkId,
+      channelFilterKey,
+    ])
 
     if (rows.length === 0) {
-      throw new ChannelFilterNotFoundError(key)
+      throw new ChannelFilterNotFoundError(channelFilterKey)
     }
 
     return channelFiltersRow.parse(rows[0]).toDomain()
   }
 
   public async getAll(): Promise<ChannelFilter[]> {
-    const stmt = this.stmt.GET_ALL
-
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL, [])
 
     return rows.map(row => channelFiltersRow.parse(row).toDomain())
   }
 
-  public async getAllForNetwork(id: NetworkID): Promise<ChannelFilter[]> {
-    const stmt = this.stmt.GET_ALL_FOR_NETWORK
-    stmt.bind({ network_id: id })
-
-    const rows = (await stmt.runAndReadAll()).getRowObjects()
+  public async getAllForNetwork(networkId: NetworkID): Promise<ChannelFilter[]> {
+    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL_FOR_NETWORK, [
+      networkId,
+    ])
 
     return rows.map(row => channelFiltersRow.parse(row).toDomain())
   }
 
   // TODO: This should happen transactionally.
   public async insert(channelFilter: ChannelFilter): Promise<ChannelFilter> {
-    const insertStmt = this.stmt.INSERT
-    const assignStmt = this.stmt.ASSIGN_CHANNEL
+    await this.database.instance.query<unknown>(this.stmt.INSERT, [
+      channelFilter.id,
+      channelFilter.key,
+      channelFilter.networkId,
+      channelFilter.name,
+      channelFilter.position,
+    ])
 
-    insertStmt.bind({
-      id: channelFilter.id,
-      key: channelFilter.key,
-      network_id: channelFilter.networkId,
-      name: channelFilter.name,
-      position: channelFilter.position,
-    })
-
-    await insertStmt.run()
-
-    for (const channel_id of channelFilter.channels) {
-      assignStmt.bind({ channel_id, channel_filter_id: channelFilter.id })
-      await assignStmt.run()
+    for (const channelId of channelFilter.channels) {
+      await this.database.instance.query<unknown>(this.stmt.ASSIGN_CHANNEL, [
+        channelId,
+        channelFilter.id,
+      ])
     }
 
     return this.getByID(channelFilter.id)

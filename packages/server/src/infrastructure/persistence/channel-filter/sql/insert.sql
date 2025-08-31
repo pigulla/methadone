@@ -1,7 +1,7 @@
 INSERT INTO
   channel_filters (id, key, network_id, name, position)
 VALUES
-  ($id, $key, $network_id, $name, $position)
+  ($1, $2, $3, $4, $5)
 RETURNING
   id,
   key,

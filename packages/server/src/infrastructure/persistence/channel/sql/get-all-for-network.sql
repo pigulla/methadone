@@ -9,4 +9,4 @@ SELECT
 FROM
   view_channels
 WHERE
-  network_id = $network_id;
+  network_id = $1;

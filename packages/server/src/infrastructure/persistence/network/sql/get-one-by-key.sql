@@ -7,4 +7,4 @@ SELECT
 FROM
   networks
 WHERE
-  key = $key;
+  key = $1;

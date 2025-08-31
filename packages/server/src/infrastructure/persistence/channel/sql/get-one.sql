@@ -9,4 +9,4 @@ SELECT
 FROM
   view_channels
 WHERE
-  id = $id;
+  id = $1;

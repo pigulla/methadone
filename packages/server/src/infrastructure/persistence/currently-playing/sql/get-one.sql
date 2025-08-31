@@ -3,8 +3,12 @@ SELECT
   artist,
   title,
   started_at,
-  duration
+  EXTRACT (
+    EPOCH
+    FROM
+      duration
+  )::INTEGER AS duration
 FROM
   currently_playing
 WHERE
-  channel_id = $channel_id;
+  channel_id = $1;
