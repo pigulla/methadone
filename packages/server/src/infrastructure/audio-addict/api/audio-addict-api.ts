@@ -106,9 +106,9 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       )
   }
 
-  public async getStreamURL(network: Network, channel: Channel): Promise<string> {
+  public async getStreamURL(networkKey: NetworkKey, channel: Channel): Promise<string> {
     const response = await this.http
-      .get(`v1/${network.key}/listen/premium/${channel.key}`)
+      .get(`v1/${networkKey}/listen/premium/${channel.key}`)
       .json<JsonValue>()
 
     return listenUrlsDtoSchema.parse(response)[0]

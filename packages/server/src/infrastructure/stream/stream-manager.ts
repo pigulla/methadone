@@ -6,26 +6,18 @@ import { ModuleRef } from '@nestjs/core'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
 import { IStreamManager, type StreamInformation } from '#application/stream-manager.interface.js'
-import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
+import type { AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
 import type { StreamEvent } from '#domain/event/stream/stream.event.js'
 import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js'
 import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 import type { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
-import { IAudioAddictAPI } from '#infrastructure/audio-addict/api/audio-addict-api.interface.js'
 
+import { IAudioAddictAPI } from '../audio-addict/api/audio-addict-api.interface.js'
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../config/audio-addict.config.js'
 
 import { IIcecastTransformStream } from './icecast-transform-stream.interface.js'
-
-const suffixMap: Readonly<Record<AudioFormat, string>> = {
-  [AUDIO_FORMAT.MP3_320]: '_hi',
-  [AUDIO_FORMAT.AAC_128]: '',
-  [AUDIO_FORMAT.AAC_64]: '_aac',
-}
-
-// TODO: Find a better name for this thing.
 
 @Injectable()
 export class StreamManager implements IStreamManager, OnModuleDestroy {
@@ -108,13 +100,14 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
 
     this.stop()
 
-    const { hostname, pathname } = new URL(await this.audioAddictApi.getStreamURL(network, channel))
+    const url = new URL(await this.audioAddictApi.getStreamURL(network.key, channel))
+    const port =
+      url.port === '' ? (url.protocol === 'https:' ? 443 : 80) : Number.parseInt(url.port, 10)
 
-    // TODO: Don't hardcode the port
-    const socket = connect(80, hostname, () => {
+    const socket = connect(port, url.hostname, () => {
       socket.pipe(icecastTransformStream).pipe(destination)
       socket.write(
-        [`GET ${pathname}?${this.config.listeningKey} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join(
+        [`GET ${url.pathname}?${this.config.listeningKey} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join(
           '\r\n',
         ),
       )
