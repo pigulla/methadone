@@ -1,14 +1,15 @@
 import { join } from 'node:path'
 
 import { Injectable, type OnModuleInit } from '@nestjs/common'
+import { TransactionHost } from '@nestjs-cls/transactional'
 
 import type { Channel, ChannelID, ChannelKey } from '#domain/channel/channel.js'
 import type { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
 import { ChannelNotFoundError } from '#domain/channel/channel-not-found.error.js'
 import type { NetworkID } from '#domain/network/network.js'
+import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
-import { IDatabase } from '../database.interface.js'
 
 import { channelsViewRow } from './sql/channels.row.js'
 
@@ -26,8 +27,8 @@ export class ChannelRepository
   >
   implements IChannelRepository, OnModuleInit
 {
-  public constructor(database: IDatabase) {
-    super(database, {
+  public constructor(txHost: TransactionHost<TransactionalAdapterPglite>) {
+    super(txHost, {
       directory: join(import.meta.dirname, 'sql'),
       fileNames: [
         'get-one',
@@ -41,7 +42,7 @@ export class ChannelRepository
   }
 
   public async getByID(channelId: ChannelID): Promise<Channel> {
-    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE, [channelId])
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ONE, [channelId])
 
     if (rows.length === 0) {
       throw new ChannelNotFoundError(channelId)
@@ -51,7 +52,7 @@ export class ChannelRepository
   }
 
   public async getByKeyForNetwork(networkId: NetworkID, channelKey: ChannelKey): Promise<Channel> {
-    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ONE_BY_KEY, [
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ONE_BY_KEY, [
       networkId,
       channelKey,
     ])
@@ -64,21 +65,19 @@ export class ChannelRepository
   }
 
   public async getAll(): Promise<Channel[]> {
-    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL, [])
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ALL, [])
 
     return rows.map(row => channelsViewRow.parse(row).toDomain())
   }
 
   public async getAllForNetwork(networkId: NetworkID): Promise<Channel[]> {
-    const { rows } = await this.database.instance.query<unknown>(this.stmt.GET_ALL_FOR_NETWORK, [
-      networkId,
-    ])
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ALL_FOR_NETWORK, [networkId])
 
     return rows.map(row => channelsViewRow.parse(row).toDomain())
   }
 
   public async insert(channel: Channel): Promise<Channel> {
-    await this.database.instance.query<unknown>(this.stmt.INSERT, [
+    await this.txHost.tx.query<unknown>(this.stmt.INSERT, [
       channel.id,
       channel.key,
       channel.networkId,
@@ -94,7 +93,7 @@ export class ChannelRepository
 
   private async setSimilar(channel: Channel): Promise<void> {
     for (const similarChannelID of channel.similar) {
-      await this.database.instance.query<unknown>(this.stmt.INSERT_SIMILAR_CHANNEL, [
+      await this.txHost.tx.query<unknown>(this.stmt.INSERT_SIMILAR_CHANNEL, [
         channel.id,
         similarChannelID,
       ])

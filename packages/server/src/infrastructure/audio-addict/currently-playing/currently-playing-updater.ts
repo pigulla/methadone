@@ -7,6 +7,7 @@ import {
   type OnApplicationBootstrap,
   type OnModuleDestroy,
 } from '@nestjs/common'
+import { Transactional } from '@nestjs-cls/transactional'
 
 import { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
@@ -58,6 +59,7 @@ export class CurrentlyPlayingUpdater
     }
   }
 
+  @Transactional()
   public async update(): Promise<void> {
     this.logger.verbose('Updating "currently playing" data')
 

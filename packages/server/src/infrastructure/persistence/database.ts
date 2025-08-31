@@ -3,6 +3,7 @@ import { join } from 'node:path'
 
 import { PGlite } from '@electric-sql/pglite'
 import { Injectable, Logger, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common'
+import dayjs from 'dayjs'
 
 import type { IDatabase } from './database.interface.js'
 
@@ -13,7 +14,17 @@ export class Database implements IDatabase, OnModuleInit, OnApplicationShutdown 
   private readonly logger = new Logger(Database.name)
 
   public constructor() {
-    this.instance = new PGlite()
+    this.instance = new PGlite({
+      parsers: {
+        1114: /* TIMESTAMP */ value => dayjs(value),
+        1184: /* TIMESTAMPTZ */ value => dayjs(value),
+        1186: /* INTERVAL */ value => {
+          // This may not work for things longer than 24 hours, but let's worry about that later.
+          const [hours, minutes, seconds] = value.split(':').map(item => Number.parseInt(item, 10))
+          return dayjs.duration({ hours, minutes, seconds })
+        },
+      },
+    })
   }
 
   public async onModuleInit(): Promise<void> {

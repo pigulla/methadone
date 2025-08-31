@@ -1,4 +1,5 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common'
+import { Transactional } from '@nestjs-cls/transactional'
 import dayjs from 'dayjs'
 
 import { Channel } from '#domain/channel/channel.js'
@@ -30,6 +31,7 @@ export class DataImporter implements OnModuleInit {
     this.channelFilterRepository = channelFilterRepository
   }
 
+  @Transactional()
   public async onModuleInit(): Promise<void> {
     const start = dayjs()
 

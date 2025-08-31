@@ -1,4 +1,5 @@
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
+import type { Duration } from 'dayjs/plugin/duration.js'
 import z from 'zod'
 
 import { channelIdSchema } from '#domain/channel/channel.schema.js'
@@ -10,15 +11,10 @@ export const currentlyPlayingRow = z
       channel_id: channelIdSchema,
       artist: z.string(),
       title: z.string(),
-      started_at: z
-        .instanceof(Date)
-        .transform(value => dayjs(value))
-        .refine(value => value.isValid()),
+      started_at: z.custom<Dayjs>(value => dayjs.isDayjs(value)).refine(value => value.isValid()),
       duration: z
-        .number()
-        .int()
-        .min(0)
-        .transform(value => dayjs.duration(value, 'seconds')),
+        .custom<Duration>(value => dayjs.isDuration(value))
+        .refine(value => value.asSeconds() >= 0),
     }),
     z.strictObject({
       channel_id: channelIdSchema,

@@ -3,11 +3,7 @@ SELECT
   artist,
   title,
   started_at,
-  EXTRACT (
-    EPOCH
-    FROM
-      duration
-  )::INTEGER AS duration
+   duration
 FROM
   currently_playing
 WHERE
