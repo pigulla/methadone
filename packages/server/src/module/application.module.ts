@@ -17,11 +17,10 @@ import { IcecastTransformStream } from '#infrastructure/stream/icecast-transform
 import { StreamManager } from '#infrastructure/stream/stream-manager.js'
 
 import { ConfigModule } from './config.module.js'
-import { DatabaseModule } from './database.module.js'
 import { RepositoryModule } from './repository.module.js'
 
 @Module({
-  imports: [RepositoryModule, ConfigModule, DatabaseModule],
+  imports: [RepositoryModule, ConfigModule],
   providers: [
     { provide: IAudioAddictAPI, useClass: AudioAddictAPI },
     DataImporter,
