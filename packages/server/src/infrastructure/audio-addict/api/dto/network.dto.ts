@@ -5,7 +5,7 @@ import z from 'zod'
 import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
 
-export const networkDtoSchema = z.object({
+const networkDtoSchema = z.object({
   id: idSchema,
   name: z.string().min(1),
   key: keySchema,

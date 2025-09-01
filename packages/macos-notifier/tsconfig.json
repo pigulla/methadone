@@ -5,9 +5,5 @@
         "rootDir": ".",
         "outDir": "./dist"
     },
-    "references": [
-        {
-            "path": "../domain"
-        }
-    ]
+    "references": []
 }

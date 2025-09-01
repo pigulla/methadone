@@ -58,7 +58,11 @@ export class NetworkController {
     summary: 'Get all networks.',
     description: 'Get all networks.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: [NetworkDTO] })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: [NetworkDTO],
+  })
   public async getAll() {
     const networks = await this.networkService.getAll()
     return networks.map(network => createNetworkDTO(network))
@@ -92,7 +96,11 @@ export class NetworkController {
     summary: 'Get all channels of a network.',
     description: 'Get all channels of the network with the given key.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: [ChannelDTO] })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: [ChannelDTO],
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The network with the given key was not found.',
@@ -111,7 +119,11 @@ export class NetworkController {
     summary: 'Get the channel with the given key.',
     description: 'Get the channels with the given key for the given network.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: ChannelDTO })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: ChannelDTO,
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The network or channel with the given key was not found.',
@@ -133,7 +145,11 @@ export class NetworkController {
     description:
       'Get the track currently playing  on the channel with the given key for the given network.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: CurrentlyPlayingDTO })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: CurrentlyPlayingDTO,
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The network or channel with the given key was not found.',
@@ -161,7 +177,11 @@ export class NetworkController {
     summary: 'Get all channel filters of a network.',
     description: 'Get all channel filters of the network with the given key.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: [ChannelFilterDTO] })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: [ChannelFilterDTO],
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The network with the given key was not found.',
@@ -182,7 +202,11 @@ export class NetworkController {
     summary: 'Get the channel filters with the given key.',
     description: 'Get the channel filters with the given key for the given network.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: ChannelFilterDTO })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: ChannelFilterDTO,
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'The network or channel filter with the given key was not found.',

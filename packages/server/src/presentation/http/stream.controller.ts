@@ -67,6 +67,10 @@ export class StreamController {
     description:
       'Stop playback of the current stream (if any). Note that a client may continue playing until its local buffer is empty.',
   })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'The operation completed successfully.',
+  })
   public stop(): void {
     this.streamManager.stop()
   }
@@ -76,7 +80,11 @@ export class StreamController {
     summary: 'Get track being streamed.',
     description: 'Get the track currently being streamed.',
   })
-  @ZodResponse({ description: 'The operation completed successfully.', type: StreamInformationDTO })
+  @ZodResponse({
+    description: 'The operation completed successfully.',
+    status: HttpStatus.OK,
+    type: StreamInformationDTO,
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'No channel is currently being streamed.',

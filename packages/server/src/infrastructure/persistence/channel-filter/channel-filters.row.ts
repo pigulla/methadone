@@ -31,5 +31,3 @@ export const channelFiltersRow = z
   }))
   .readonly()
   .brand('channel-filters-row')
-
-export type ChannelFiltersRow = z.infer<typeof channelFiltersRow>

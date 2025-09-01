@@ -15,7 +15,7 @@ import type { NetworkID } from '#domain/network/network.js'
 import { AbstractRepository } from '../abstract.repository.js'
 import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
-import { channelFiltersRow } from './sql/channel-filters.row.js'
+import { channelFiltersRow } from './channel-filters.row.js'
 
 @Injectable()
 export class ChannelFilterRepository

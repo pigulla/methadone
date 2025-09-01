@@ -24,5 +24,3 @@ export const channelsViewRow = z
   }))
   .readonly()
   .brand('channels-view-row')
-
-export type ChannelsViewRow = z.infer<typeof channelsViewRow>

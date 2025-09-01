@@ -3,7 +3,7 @@ SELECT
   artist,
   title,
   started_at,
-   duration
+  duration
 FROM
   currently_playing
 WHERE

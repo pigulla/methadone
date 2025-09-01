@@ -21,7 +21,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger'
+import { ApiOperation, ApiProduces, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
 import { type Response } from 'express'
 import { nanoid } from 'nanoid'
 import { Subject } from 'rxjs'
@@ -45,6 +45,7 @@ function generateClientId(): ClientID {
 
 @Controller('sse')
 @UseGuards(ApiKeyGuard)
+@ApiTags('sse')
 @ApiSecurity('api-key')
 @ApiResponse({
   status: HttpStatus.BAD_REQUEST,
@@ -121,16 +122,19 @@ export class ServerSentEventsController implements OnApplicationBootstrap, OnMod
   }
 
   @OnEvent(StreamStartedEvent.NAME)
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Event listener callback
   private onStreamStarted({ network, channel }: StreamStartedEvent): void {
     this.broadcast(createStreamStartedDTO({ network, channel }))
   }
 
   @OnEvent(StreamStoppedEvent.NAME)
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Event listener callback
   private onStreamStopped(_event: StreamStoppedEvent): void {
     this.broadcast(createStreamStoppedDTO())
   }
 
   @OnEvent(StreamTrackEvent.NAME)
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Event listener callback
   private onStreamNewTrack({ track }: StreamTrackEvent): void {
     this.broadcast(createStreamTrackDTO({ track }))
   }
@@ -145,6 +149,12 @@ export class ServerSentEventsController implements OnApplicationBootstrap, OnMod
     summary: 'Subscribe to update notifications.',
     description: 'Subscribe to update notifications via server-sent events.',
   })
+  @ApiProduces('text/event-stream')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The operation completed successfully.',
+    schema: { type: 'string' },
+  })
   public sse(@Res() response: Response): void {
     const clientId = generateClientId()
     const subject = new Subject<Event>()
@@ -155,9 +165,6 @@ export class ServerSentEventsController implements OnApplicationBootstrap, OnMod
       },
       complete: () => {
         this.logger.debug({ clientId }, 'Client disconnected')
-      },
-      error: (error: unknown) => {
-        this.logger.warn('Papaya?')
       },
     }
 

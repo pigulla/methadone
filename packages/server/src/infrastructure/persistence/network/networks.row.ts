@@ -17,5 +17,3 @@ export const networksRow = z
   }))
   .readonly()
   .brand('networks-row')
-
-export type NetworksRow = z.infer<typeof networksRow>

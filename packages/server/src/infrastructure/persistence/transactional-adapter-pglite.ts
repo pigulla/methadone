@@ -3,13 +3,13 @@ import type { TransactionalAdapter, TransactionalAdapterOptions } from '@nestjs-
 
 import { IDatabase } from './database.interface.js'
 
-export type PgliteTxOptions = {
+type PgliteTxOptions = {
   deferConstraints: boolean
 }
 
-export type Connection = Pick<Transaction, 'query' | 'exec' | 'sql'>
+type Connection = Pick<Transaction, 'query' | 'exec' | 'sql'>
 
-export interface PgliteTransactionalAdapterOptions {
+interface PgliteTransactionalAdapterOptions {
   dbInstanceToken: unknown
   defaultTxOptions?: PgliteTxOptions
 }

@@ -13,8 +13,8 @@
     },
     "openApi": {
         "server": "http://example.com",
-        "title": "My API",
-        "description": "This is my API.",
+        "title": "Methadone API",
+        "description": "This is the Methadone HTTP API.",
         "version": "1.0",
         "swagger": {
             "enabled": false,

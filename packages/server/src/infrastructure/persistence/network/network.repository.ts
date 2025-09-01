@@ -10,7 +10,7 @@ import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js
 import { AbstractRepository } from '../abstract.repository.js'
 import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
-import { networksRow } from './sql/networks.row.js'
+import { networksRow } from './networks.row.js'
 
 @Injectable()
 export class NetworkRepository

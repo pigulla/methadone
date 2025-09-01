@@ -13,7 +13,7 @@ import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js
 import { AbstractRepository } from '../abstract.repository.js'
 import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
-import { currentlyPlayingRow } from './sql/currently-playing.row.js'
+import { currentlyPlayingRow } from './currently-playing.row.js'
 
 @Injectable()
 export class CurrentlyPlayingRepository

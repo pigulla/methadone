@@ -3,12 +3,11 @@ import { keySchema } from '@methadone/dto/http/key.schema.js'
 import z from 'zod'
 
 import { channelDtoSchema } from './channel.dto.js'
+import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
 import { protocollessUrlTemplateSchema } from './protocolless-url-template.schema.js'
 
-export const idSchema = z.number().int().positive()
-
-export const channelFilterDtoSchema = z.object({
+const channelFilterDtoSchema = z.object({
   id: idSchema,
   description_text: z.string(),
   description_title: z.string(),

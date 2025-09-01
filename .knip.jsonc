@@ -1,23 +1,25 @@
 {
     "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
     "workspaces": {
-        ".": {
-            "entry": "scripts/*.ts",
-            "project": "scripts/**/*.ts"
+        "packages/dto": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["dist/**"]
         },
-        "packages/*": {
-            "entry": "src/index.ts",
-            "project": ["src/**/*.ts", "test/**/*.ts"]
+        "packages/macos-notifier": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["dist/**"],
+            "ignoreBinaries": ["osascript"]
         },
-        "packages/app": {
-            "entry": ["src/index.ts", "scripts/build-openapi-spec.ts"],
-            "ignoreDependencies": [
-                "@nestjs/schematics",
-                "@types/express",
-                "pino",
-                "pino-pretty",
-                "yaml"
-            ]
+        "packages/server": {
+            "ignore": ["dist/**"],
+            "ignoreDependencies": ["pino", "pino-pretty", "yaml"],
+            "paths": {
+                "#application/*": ["src/application/*"],
+                "#domain/*": ["src/domain/*"],
+                "#infrastructure/*": ["src/infrastructure/*"],
+                "#module/*": ["src/module/*"],
+                "#presentation/*": ["src/presentation/*"]
+            }
         }
     },
     "ignoreDependencies": [
