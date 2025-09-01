@@ -36,6 +36,6 @@
         "test": "npm run lint && npm run vitest && npm audit --omit dev --audit-level high"
     },
     "dependencies": {
-        "nestjs-zod": "5.0.0"
+        "nestjs-zod": "5.0.1"
     }
 }

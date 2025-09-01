@@ -7,9 +7,9 @@ import type { Channel, ChannelID, ChannelKey } from '#domain/channel/channel.js'
 import type { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
 import { ChannelNotFoundError } from '#domain/channel/channel-not-found.error.js'
 import type { NetworkID } from '#domain/network/network.js'
-import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
+import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
 import { channelsViewRow } from './sql/channels.row.js'
 

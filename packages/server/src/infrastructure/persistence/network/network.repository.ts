@@ -6,9 +6,9 @@ import { TransactionHost } from '@nestjs-cls/transactional'
 import type { Network, NetworkID, NetworkKey } from '#domain/network/network.js'
 import type { INetworkRepository } from '#domain/network/network.repository.interface.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
-import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
+import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
 import { networksRow } from './sql/networks.row.js'
 

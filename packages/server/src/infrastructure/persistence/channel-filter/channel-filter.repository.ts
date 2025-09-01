@@ -11,9 +11,9 @@ import type {
 import type { IChannelFilterRepository } from '#domain/channel-filter/channel-filter.repository.interface.js'
 import { ChannelFilterNotFoundError } from '#domain/channel-filter/channel-filter-not-found.error.js'
 import type { NetworkID } from '#domain/network/network.js'
-import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
+import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
 import { channelFiltersRow } from './sql/channel-filters.row.js'
 

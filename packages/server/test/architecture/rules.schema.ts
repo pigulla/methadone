@@ -21,15 +21,11 @@ const EXCEPTION = {
 export type Exception = keyof typeof EXCEPTION
 
 const componentSchema = z.union(
-  ['application', 'domain', 'presentation', 'infrastructure', 'module', 'util'].map(value =>
-    z.literal(value).transform(value => value as Component),
-  ),
+  Object.values(COMPONENT).map(value => z.literal(value).transform(value => value as Component)),
 )
 
 const exceptionSchema = z.union(
-  ['errors', 'interfaces', 'configs'].map(value =>
-    z.literal(value).transform(value => value as Exception),
-  ),
+  Object.values(EXCEPTION).map(value => z.literal(value).transform(value => value as Exception)),
 )
 
 const ruleSchema = z.strictObject({
@@ -41,6 +37,12 @@ const ruleSchema = z.strictObject({
     .optional()
     .default([])
     .transform(value => new Set(Array.isArray(value) ? value : [value])),
+  ignoringErrorsIn: z
+    .union([z.string(), z.array(z.string())])
+    .transform(value => (Array.isArray(value) ? value : [value]))
+    .transform(values => new Set(values))
+    .optional()
+    .default(new Set()),
 })
 
 export const rulesSchema = z.record(componentSchema, z.array(ruleSchema))

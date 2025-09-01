@@ -1,5 +1,4 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common'
-import { Transactional } from '@nestjs-cls/transactional'
 import dayjs from 'dayjs'
 
 import { Channel } from '#domain/channel/channel.js'
@@ -8,6 +7,7 @@ import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { IChannelFilterRepository } from '#domain/channel-filter/channel-filter.repository.interface.js'
 import { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
+import { Transactional } from '#domain/transactional.js'
 
 import { IAudioAddictAPI } from './api/audio-addict-api.interface.js'
 
@@ -31,8 +31,12 @@ export class DataImporter implements OnModuleInit {
     this.channelFilterRepository = channelFilterRepository
   }
 
-  @Transactional()
   public async onModuleInit(): Promise<void> {
+    await this.importAll()
+  }
+
+  @Transactional({ deferConstraints: true })
+  public async importAll(): Promise<void> {
     const start = dayjs()
 
     const networks = await this.loadNetworks()
@@ -40,7 +44,7 @@ export class DataImporter implements OnModuleInit {
     await this.loadChannelFilters(networks)
 
     this.logger.log(
-      `Successfully imported AudioAddict data (took ${start.diff(dayjs(), 'seconds').toFixed(1)} seconds)`,
+      `Successfully imported AudioAddict data (took ${dayjs().diff(start, 'seconds').toFixed(2)} seconds)`,
     )
   }
 

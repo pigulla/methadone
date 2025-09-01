@@ -9,8 +9,8 @@ import { Logger } from 'nestjs-pino'
 import { OPEN_API_CONFIG, type OpenApiConfig } from '#infrastructure/config/open-api.config.js'
 import { SERVER_CONFIG, type ServerConfig } from '#infrastructure/config/server.config.js'
 import { MainModule } from '#module/main.module.js'
+import { createOpenAPIDocument } from '#presentation/http/create-openapi-document.js'
 import { EntityNotFoundExceptionFilter } from '#presentation/http/entity-not-found.exception-filter.js'
-import { createOpenAPIDocument } from '#util/create-openapi-document.js'
 
 dayjs.extend(durationPlugin)
 dayjs.extend(objectSupportPlugin)

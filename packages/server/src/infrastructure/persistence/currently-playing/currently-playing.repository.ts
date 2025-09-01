@@ -9,9 +9,9 @@ import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js
 import type { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import type { NetworkID } from '#domain/network/network.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
-import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
+import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
 import { currentlyPlayingRow } from './sql/currently-playing.row.js'
 

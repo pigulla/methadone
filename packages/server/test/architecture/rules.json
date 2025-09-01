@@ -1,12 +1,16 @@
 {
     "application": [
         {
-            "mustNotImportFrom": ["infrastructure", "presentation", "module"]
+            "mustNotImportFrom": ["infrastructure", "module", "presentation"]
         }
     ],
     "domain": [
         {
-            "mustNotImportFrom": ["application", "presentation", "infrastructure", "module"]
+            "mustNotImportFrom": ["application", "module", "presentation"]
+        },
+        {
+            "mustNotImportFrom": "infrastructure",
+            "ignoringErrorsIn": "src/domain/transactional.ts"
         }
     ],
     "presentation": [
@@ -15,16 +19,16 @@
         },
         {
             "mustNotImportFrom": "application",
-            "exceptFor": ["interfaces", "errors"]
+            "exceptFor": ["configs", "errors", "interfaces"]
         }
     ],
     "infrastructure": [
         {
-            "mustNotImportFrom": ["presentation", "module"]
+            "mustNotImportFrom": ["module", "presentation"]
         },
         {
             "mustNotImportFrom": "application",
-            "exceptFor": ["interfaces", "errors"]
+            "exceptFor": ["configs", "errors", "interfaces"]
         }
     ],
     "module": [],
@@ -33,9 +37,9 @@
             "mustNotImportFrom": [
                 "application",
                 "domain",
-                "presentation",
                 "infrastructure",
-                "module"
+                "module",
+                "presentation"
             ]
         }
     ]

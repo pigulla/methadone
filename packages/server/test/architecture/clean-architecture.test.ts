@@ -1,13 +1,14 @@
 import { join } from 'node:path'
 
 import { filesOfProject } from 'tsarch'
+import type { ViolatingFileDependency } from 'tsarch/dist/src/files/assertion/dependOnFiles'
 import { describe, expect, it } from 'vitest'
 
 import rulesJson from './rules.json' with { type: 'json' }
 import { type Component, type Exception, type Rule, rulesSchema } from './rules.schema.js'
 
 describe('The project implements a clean architecture where', () => {
-  const pathToTsConfig = join(import.meta.dirname, '..', '..', 'tsconfig.json')
+  const pathToTsConfig = join(import.meta.dirname, '..', '..', 'tsconfig.ts-arch.json')
   const rules = rulesSchema.parse(rulesJson)
 
   describe.each<[string, Rule[]]>(Object.entries(rules))('files in %s', (source, rulesMap) => {
@@ -16,6 +17,7 @@ describe('The project implements a clean architecture where', () => {
       string, // exceptions string (for display purposes only)
       Component, // target folder
       Set<Exception>,
+      Set<string>, // ignored files
     ]
 
     const rules = rulesMap.flatMap(rule =>
@@ -24,12 +26,13 @@ describe('The project implements a clean architecture where', () => {
         rule.exceptFor.size === 0 ? '' : ` (except for ${[...rule.exceptFor].join(', ')})`,
         source as Component,
         rule.exceptFor,
+        rule.ignoringErrorsIn,
       ]),
     )
 
     it.each<TestCase>(rules)(
-      'should not import from %s%s',
-      async (target, _, source, exceptions) => {
+      'should not import from %s',
+      async (target, _, source, exceptions, ignoredFiles) => {
         let rule = filesOfProject(pathToTsConfig)
           .inFolder(source)
           .shouldNot()
@@ -43,7 +46,11 @@ describe('The project implements a clean architecture where', () => {
           rule = rule.matchingPattern(`.*(?<!${exceptionPattern})$`)
         }
 
-        await expect(rule.check()).resolves.toEqual([])
+        const result = (await rule.check()) as ViolatingFileDependency[]
+
+        expect(
+          result.filter(violation => !ignoredFiles.has(violation.dependency.sourceLabel)),
+        ).toEqual([])
       },
     )
   })

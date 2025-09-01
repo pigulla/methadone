@@ -1,9 +1,10 @@
-import { type INestApplication } from '@nestjs/common'
+import type { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from '@nestjs/swagger'
 import dayjs from 'dayjs'
 import durationPlugin from 'dayjs/plugin/duration.js'
+import { cleanupOpenApiDoc } from 'nestjs-zod'
 
-import { type OpenApiConfig } from '#infrastructure/config/open-api.config.js'
+import type { OpenApiConfig } from '#infrastructure/config/open-api.config.js'
 
 dayjs.extend(durationPlugin)
 
@@ -11,7 +12,7 @@ export function createOpenAPIDocument(
   app: INestApplication,
   openApiConfig: OpenApiConfig,
 ): OpenAPIObject {
-  return SwaggerModule.createDocument(
+  const document = SwaggerModule.createDocument(
     app,
     new DocumentBuilder()
       .setTitle(openApiConfig.title)
@@ -32,4 +33,6 @@ export function createOpenAPIDocument(
       })
       .build(),
   )
+
+  return cleanupOpenApiDoc(document, { version: '3.0' })
 }

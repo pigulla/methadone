@@ -1,0 +1,12 @@
+{
+    "extends": ["./tsconfig.json"],
+    "compilerOptions": {
+        "paths": {
+            "#application/*": ["./src/application/*"],
+            "#domain/*": ["./src/domain/*"],
+            "#infrastructure/*": ["./src/infrastructure/*"],
+            "#module/*": ["./src/module/*"],
+            "#presentation/*": ["./src/presentation/*"]
+        }
+    }
+}

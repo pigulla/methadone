@@ -26,6 +26,9 @@ export class AudioAddictAPI implements IAudioAddictAPI {
 
   public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig) {
     this.http = got.extend({
+      // Using something like keyf-file here would be nice (so we can cache between runs). Unfortunately, there seems
+      // to be some weird bug that causes the application to randomly terminate (with exit code zero). CBA at this point
+      // to investigate what's going on. The benefit is arguably marginal anyway.
       cache: config.useCache ? new Map() : false,
       prefixUrl: config.baseUrl,
     })
