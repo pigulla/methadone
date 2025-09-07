@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { join } from 'node:path'
+
+import { Injectable, type OnModuleInit } from '@nestjs/common'
+import { TransactionHost } from '@nestjs-cls/transactional'
 
 import type {
   ChannelFilter,
@@ -10,82 +13,81 @@ import { ChannelFilterNotFoundError } from '#domain/channel-filter/channel-filte
 import type { NetworkID } from '#domain/network/network.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
+import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
 import { channelFiltersRow } from './channel-filters.row.js'
 
 @Injectable()
 export class ChannelFilterRepository
-  extends AbstractRepository
-  implements IChannelFilterRepository
+  extends AbstractRepository<
+    ['get-one', 'get-one-by-key', 'get-all', 'get-all-for-network', 'insert', 'assign-channel']
+  >
+  implements IChannelFilterRepository, OnModuleInit
 {
-  public async getByID(channelFilterId: ChannelFilterID): Promise<ChannelFilter> {
-    const row = await this.txHost.tx
-      .selectFrom('view_channel_filters')
-      .where('id', '=', channelFilterId)
-      .selectAll()
-      .executeTakeFirst()
+  public constructor(txHost: TransactionHost<TransactionalAdapterPglite>) {
+    super(txHost, {
+      directory: join(import.meta.dirname, 'sql'),
+      fileNames: [
+        'get-one',
+        'get-one-by-key',
+        'get-all',
+        'get-all-for-network',
+        'insert',
+        'assign-channel',
+      ],
+    })
+  }
 
-    if (!row) {
+  public async getByID(channelFilterId: ChannelFilterID): Promise<ChannelFilter> {
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ONE, [channelFilterId])
+
+    if (rows.length === 0) {
       throw new ChannelFilterNotFoundError(channelFilterId)
     }
 
-    return channelFiltersRow.parse(row).toDomain()
+    return channelFiltersRow.parse(rows[0]).toDomain()
   }
 
   public async getByKeyForNetwork(
     networkId: NetworkID,
     channelFilterKey: ChannelFilterKey,
   ): Promise<ChannelFilter> {
-    const row = await this.txHost.tx
-      .selectFrom('view_channel_filters')
-      .where('network_id', '=', networkId)
-      .where('key', '=', channelFilterKey)
-      .selectAll()
-      .executeTakeFirst()
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ONE_BY_KEY, [
+      networkId,
+      channelFilterKey,
+    ])
 
-    if (!row) {
+    if (rows.length === 0) {
       throw new ChannelFilterNotFoundError(channelFilterKey)
     }
 
-    return channelFiltersRow.parse(row).toDomain()
+    return channelFiltersRow.parse(rows[0]).toDomain()
   }
 
   public async getAll(): Promise<ChannelFilter[]> {
-    const rows = await this.txHost.tx.selectFrom('view_channel_filters').selectAll().execute()
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ALL, [])
 
     return rows.map(row => channelFiltersRow.parse(row).toDomain())
   }
 
   public async getAllForNetwork(networkId: NetworkID): Promise<ChannelFilter[]> {
-    const rows = await this.txHost.tx
-      .selectFrom('view_channel_filters')
-      .where('network_id', '=', networkId)
-      .selectAll()
-      .execute()
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ALL_FOR_NETWORK, [networkId])
 
     return rows.map(row => channelFiltersRow.parse(row).toDomain())
   }
 
+  // TODO: This should happen transactionally.
   public async insert(channelFilter: ChannelFilter): Promise<ChannelFilter> {
-    await this.txHost.tx
-      .insertInto('channel_filters')
-      .values({
-        id: channelFilter.id,
-        key: channelFilter.key,
-        network_id: channelFilter.networkId,
-        name: channelFilter.name,
-        position: channelFilter.position,
-      })
-      .execute()
+    await this.txHost.tx.query<unknown>(this.stmt.INSERT, [
+      channelFilter.id,
+      channelFilter.key,
+      channelFilter.networkId,
+      channelFilter.name,
+      channelFilter.position,
+    ])
 
     for (const channelId of channelFilter.channels) {
-      await this.txHost.tx
-        .insertInto('channels_to_channel_filters')
-        .values({
-          channel_id: channelId,
-          channel_filter_id: channelFilter.id,
-        })
-        .execute()
+      await this.txHost.tx.query<unknown>(this.stmt.ASSIGN_CHANNEL, [channelId, channelFilter.id])
     }
 
     return this.getByID(channelFilter.id)

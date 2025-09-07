@@ -2,15 +2,16 @@ import { Module } from '@nestjs/common'
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ClsPluginTransactional } from '@nestjs-cls/transactional'
-import { TransactionalAdapterKysely } from '@nestjs-cls/transactional-adapter-kysely'
 import { ClsModule } from 'nestjs-cls'
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod'
 
+import { IDatabase } from '#infrastructure/persistence/database.interface.js'
+import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
 import { ApplicationModule } from '#module/application.module.js'
 import { ControllerModule } from '#module/controller.module.js'
 
 import { ConfigModule } from './config.module.js'
-import { DatabaseModule, KYSLEY } from './database.module.js'
+import { DatabaseModule } from './database.module.js'
 import { LoggingModule } from './logging.module.js'
 
 @Module({
@@ -20,7 +21,9 @@ import { LoggingModule } from './logging.module.js'
       plugins: [
         new ClsPluginTransactional({
           imports: [DatabaseModule],
-          adapter: new TransactionalAdapterKysely({ kyselyInstanceToken: KYSLEY }),
+          adapter: new TransactionalAdapterPglite({
+            dbInstanceToken: IDatabase,
+          }),
         }),
       ],
     }),

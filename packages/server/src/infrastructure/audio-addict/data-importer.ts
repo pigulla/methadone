@@ -35,7 +35,7 @@ export class DataImporter implements OnModuleInit {
     await this.importAll()
   }
 
-  @Transactional()
+  @Transactional({ deferConstraints: true })
   public async importAll(): Promise<void> {
     const start = dayjs()
 

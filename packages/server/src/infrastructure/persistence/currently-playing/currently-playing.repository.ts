@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { join } from 'node:path'
+
+import { Injectable, type OnModuleInit } from '@nestjs/common'
+import { TransactionHost } from '@nestjs-cls/transactional'
 
 import type { ChannelID } from '#domain/channel/channel.js'
 import { ChannelNotFoundError } from '#domain/channel/channel-not-found.error.js'
@@ -8,44 +11,40 @@ import type { NetworkID } from '#domain/network/network.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
+import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'
 
 import { currentlyPlayingRow } from './currently-playing.row.js'
 
 @Injectable()
 export class CurrentlyPlayingRepository
-  extends AbstractRepository
-  implements ICurrentlyPlayingRepository
+  extends AbstractRepository<['delete-all', 'get-one', 'get-all', 'get-all-for-network', 'upsert']>
+  implements ICurrentlyPlayingRepository, OnModuleInit
 {
+  public constructor(txHost: TransactionHost<TransactionalAdapterPglite>) {
+    super(txHost, {
+      directory: join(import.meta.dirname, 'sql'),
+      fileNames: ['delete-all', 'get-one', 'get-all', 'get-all-for-network', 'upsert'],
+    })
+  }
+
   public async deleteAll(): Promise<void> {
-    await this.txHost.tx.deleteFrom('currently_playing').execute()
+    await this.txHost.tx.query(this.stmt.DELETE_ALL)
   }
 
   public async get(channelId: ChannelID): Promise<CurrentlyPlaying | null> {
-    const row = await this.txHost.tx
-      .selectFrom('currently_playing')
-      .where('channel_id', '=', channelId)
-      .selectAll()
-      .executeTakeFirst()
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ONE, [channelId])
 
-    if (!row) {
+    if (rows.length === 0) {
       throw new ChannelNotFoundError(channelId)
     }
 
-    return currentlyPlayingRow.parse(row).toDomain()
+    return currentlyPlayingRow.parse(rows[0]).toDomain()
   }
 
   public async getForNetwork(
     networkId: NetworkID,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const rows = await this.txHost.tx
-      .selectFrom('currently_playing')
-      .leftJoin('channels', join =>
-        join
-          .onRef('channels.id', '=', 'currently_playing.channel_id')
-          .on('channels.network_id', '=', networkId),
-      )
-      .selectAll()
-      .execute()
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ONE, [networkId])
 
     if (rows.length === 0) {
       // Theoretically there could of course be networks with no channels, but in practice that's not going to happen.
@@ -60,7 +59,7 @@ export class CurrentlyPlayingRepository
   }
 
   public async getAll(): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
-    const rows = await this.txHost.tx.selectFrom('currently_playing').selectAll().execute()
+    const { rows } = await this.txHost.tx.query<unknown>(this.stmt.GET_ALL, [])
 
     return new Map(
       rows
@@ -73,23 +72,12 @@ export class CurrentlyPlayingRepository
     channelId: ChannelID,
     currentlyPlaying: CurrentlyPlaying | null,
   ): Promise<void> {
-    await this.txHost.tx
-      .insertInto('currently_playing')
-      .values({
-        channel_id: channelId,
-        artist: currentlyPlaying?.artist ?? null,
-        title: currentlyPlaying?.title ?? null,
-        started_at: currentlyPlaying?.startedAt.toISOString() ?? null,
-        duration: currentlyPlaying?.duration.asSeconds() ?? null,
-      })
-      .onConflict(oc =>
-        oc.column('channel_id').doUpdateSet({
-          artist: eb => eb.ref('excluded.artist'),
-          title: eb => eb.ref('excluded.title'),
-          started_at: eb => eb.ref('excluded.started_at'),
-          duration: eb => eb.ref('excluded.duration'),
-        }),
-      )
-      .execute()
+    await this.txHost.tx.query<unknown>(this.stmt.UPSERT, [
+      channelId,
+      currentlyPlaying ? currentlyPlaying.artist : null,
+      currentlyPlaying ? currentlyPlaying.title : null,
+      currentlyPlaying ? currentlyPlaying.startedAt.toISOString() : null,
+      currentlyPlaying ? currentlyPlaying.duration.asSeconds() : null,
+    ])
   }
 }

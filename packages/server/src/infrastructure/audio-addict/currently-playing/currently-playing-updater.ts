@@ -9,8 +9,6 @@ import {
 } from '@nestjs/common'
 import { Transactional } from '@nestjs-cls/transactional'
 
-import type { ChannelID } from '#domain/channel/channel.js'
-import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 
@@ -67,20 +65,13 @@ export class CurrentlyPlayingUpdater
     this.logger.verbose('Updating "currently playing" data')
 
     const networks = await this.networkRepository.getAll()
-    const data: Map<ChannelID, CurrentlyPlaying | null>[] = []
+    const currentlyPlayingByNetwork = await Promise.all(
+      networks.map(network => this.api.getCurrentlyPlaying(network.key)),
+    )
+    const currentlyPlaying = currentlyPlayingByNetwork.flatMap(item => [...item.entries()])
 
-    for (const network of networks) {
-      this.logger.warn(network.name)
-      data.push(await this.api.getCurrentlyPlaying(network.key))
-    }
-
-    const currentlyPlaying = data.flatMap(item => [...item.entries()])
-
-    this.logger.warn('Deleting')
     await this.nowPlayingRepository.deleteAll()
-
     for (const [channelId, item] of currentlyPlaying) {
-      this.logger.warn(`Upserting ${channelId}`)
       await this.nowPlayingRepository.upsert(channelId, item)
     }
 

@@ -70,15 +70,14 @@
         "vitest:unit": "vitest run src"
     },
     "dependencies": {
+        "@electric-sql/pglite": "0.3.7",
         "@methadone/dto": "0.0.1",
         "@nestjs-cls/transactional": "3.1.0",
-        "@nestjs-cls/transactional-adapter-kysely": "1.4.0",
         "@nestjs/common": "11.1.6",
         "@nestjs/core": "11.1.6",
         "@nestjs/event-emitter": "3.0.1",
         "@nestjs/platform-express": "11.1.6",
         "@nestjs/swagger": "11.2.0",
-        "better-sqlite3": "12.2.0",
         "config": "4.1.1",
         "dayjs": "1.11.18",
         "execa": "9.6.0",
@@ -98,6 +97,7 @@
         "@types/supertest": "6.0.3",
         "glob": "11.0.3",
         "pino-pretty": "13.1.1",
+        "sql-formatter": "15.6.8",
         "supertest": "7.1.4",
         "type-fest": "4.41.0",
         "yaml": "2.8.1"

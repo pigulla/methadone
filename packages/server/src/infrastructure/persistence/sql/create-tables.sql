@@ -18,6 +18,8 @@ CREATE TABLE channels (
 
 CREATE TABLE similar_channels (
   channel_id INTEGER REFERENCES channels (id) NOT NULL,
+  --   similar_channel_id INTEGER CHECK (channel_id <> similar_channel_id) NOT NULL,
+  -- TODO: FIXME
   similar_channel_id INTEGER REFERENCES channels (id) DEFERRABLE INITIALLY IMMEDIATE CHECK (channel_id <> similar_channel_id) NOT NULL,
   PRIMARY KEY (channel_id, similar_channel_id)
 );
