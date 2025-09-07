@@ -19,6 +19,7 @@
   "type": "module",
   "workspaces": [
     "packages/dto",
+    "packages/client",
     "packages/macos-notifier",
     "packages/server"
   ],

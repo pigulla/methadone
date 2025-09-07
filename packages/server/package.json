@@ -2,6 +2,7 @@
     "name": "@methadone/server",
     "version": "0.0.1",
     "description": "The server part.",
+    "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
     },
@@ -101,6 +102,5 @@
         "supertest": "7.1.4",
         "type-fest": "4.41.0",
         "yaml": "2.8.1"
-    },
-    "tags": []
+    }
 }
