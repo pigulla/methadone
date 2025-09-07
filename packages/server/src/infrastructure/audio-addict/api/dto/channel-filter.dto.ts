@@ -6,13 +6,14 @@ import { channelDtoSchema } from './channel.dto.js'
 import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
 import { protocollessUrlTemplateSchema } from './protocolless-url-template.schema.js'
+import { sanitizeString } from './sanitize-string.js'
 
 const channelFilterDtoSchema = z.object({
   id: idSchema,
-  description_text: z.string(),
-  description_title: z.string(),
+  description_text: z.string().pipe(sanitizeString),
+  description_title: z.string().pipe(sanitizeString),
   key: keySchema,
-  name: z.string().min(1),
+  name: z.string().min(1).pipe(sanitizeString),
   position: z.number().int().min(0),
   network_id: idSchema,
   created_at: isoDateSchema.nullable(),

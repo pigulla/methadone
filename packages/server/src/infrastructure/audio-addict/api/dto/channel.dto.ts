@@ -7,19 +7,20 @@ import { channelFilterIdSchema } from '#domain/channel-filter/channel-filter.sch
 import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
 import { protocollessUrlTemplateSchema } from './protocolless-url-template.schema.js'
+import { sanitizeString } from './sanitize-string.js'
 
 export const channelDtoSchema = z.object({
   id: idSchema,
-  channel_director: z.string(),
-  description_long: z.string(),
-  description_short: z.string(),
+  channel_director: z.string().pipe(sanitizeString),
+  description_long: z.string().pipe(sanitizeString),
+  description_short: z.string().pipe(sanitizeString),
   key: keySchema,
-  name: z.string().min(1),
+  name: z.string().min(1).pipe(sanitizeString),
   public: z.boolean(),
   network_id: idSchema,
   asset_url: protocollessUrlTemplateSchema.nullable(),
   banner_url: protocollessUrlTemplateSchema.nullable(),
-  description: z.string(),
+  description: z.string().pipe(sanitizeString),
   created_at: isoDateSchema,
   updated_at: isoDateSchema,
   similar_channels: z.array(z.strictObject({ id: idSchema, similar_channel_id: idSchema })),

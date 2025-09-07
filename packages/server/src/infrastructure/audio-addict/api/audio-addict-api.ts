@@ -26,10 +26,9 @@ export class AudioAddictAPI implements IAudioAddictAPI {
 
   public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig) {
     this.http = got.extend({
-      // Using something like keyf-file here would be nice (so we can cache between runs). Unfortunately, there seems
-      // to be some weird bug that causes the application to randomly terminate (with exit code zero). CBA at this point
-      // to investigate what's going on. The benefit is arguably marginal anyway.
-      cache: config.useCache ? new Map() : false,
+      // Using Got's built-in ETag-based cache would be nice. Unfortunately, there seems to be some strange bug in there
+      // somewhere that causes requests to occasionally hang for no apparent reason. This happens with both 'new Map()'
+      // and keyf-file. No clue what's going on here.
       prefixUrl: config.baseUrl,
     })
   }

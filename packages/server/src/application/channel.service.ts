@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { Channel, type ChannelKey } from '#domain/channel/channel.js'
+import { Channel, type ChannelID, type ChannelKey } from '#domain/channel/channel.js'
 import { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
 import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
@@ -27,7 +27,7 @@ export class ChannelService implements IChannelService {
   }
 
   @Transactional()
-  public async getCurrentlyPlaying(
+  public async getCurrentlyPlayingOnChannel(
     networkKey: NetworkKey,
     channelKey: ChannelKey,
   ): Promise<CurrentlyPlaying | null> {
@@ -35,6 +35,15 @@ export class ChannelService implements IChannelService {
     const channel = await this.channelRepository.getByKeyForNetwork(network.id, channelKey)
 
     return this.currentlyPlayingRepository.get(channel.id)
+  }
+
+  @Transactional()
+  public async getCurrentlyPlayingOnNetwork(
+    networkKey: NetworkKey,
+  ): Promise<Map<ChannelID, CurrentlyPlaying | null>> {
+    const network = await this.networkRepository.getByKey(networkKey)
+
+    return this.currentlyPlayingRepository.getForNetwork(network.id)
   }
 
   @Transactional()

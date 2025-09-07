@@ -1,6 +1,8 @@
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
+import { idSchema } from './id.schema.js'
+
 export const currentlyPlayingDtoSchema = z.object({
   track: z
     .object({
@@ -32,4 +34,35 @@ export function createCurrentlyPlayingDTO(
         }
       : null,
   })
+}
+
+export const currentlyPlayingOnChannelDtoSchema = z.object({
+  channelId: idSchema,
+  currentlyPlaying: currentlyPlayingDtoSchema.nullable(),
+})
+
+export class CurrentlyPlayingOnChannelDTO extends createZodDto(
+  currentlyPlayingOnChannelDtoSchema,
+) {}
+
+export const currentlyPlayingOnNetworkDtoSchema = z.array(currentlyPlayingOnChannelDtoSchema)
+
+export class CurrentlyPlayingOnNetworkDTO extends createZodDto(
+  currentlyPlayingOnNetworkDtoSchema,
+) {}
+
+export function createCurrentlyPlayingOnNetworkDTO(
+  entries: [
+    number,
+    {
+      artist: string
+      title: string
+      startedAt: string
+      endsAt: string
+    } | null,
+  ][],
+): CurrentlyPlayingOnNetworkDTO {
+  return CurrentlyPlayingOnNetworkDTO.create(
+    entries.map(([channelId, currentlyPlaying]) => ({ channelId, currentlyPlaying })),
+  )
 }

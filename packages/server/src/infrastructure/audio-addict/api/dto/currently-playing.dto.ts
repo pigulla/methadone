@@ -4,6 +4,7 @@ import { channelIdSchema, channelKeySchema } from '#domain/channel/channel.schem
 
 import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
+import { sanitizeString } from './sanitize-string.js'
 
 export const currentlyPlayingDtoSchema = z.array(
   z.object({
@@ -12,8 +13,8 @@ export const currentlyPlayingDtoSchema = z.array(
     track: z
       .strictObject({
         id: idSchema,
-        display_artist: z.string(),
-        display_title: z.string(),
+        display_artist: z.string().pipe(sanitizeString),
+        display_title: z.string().pipe(sanitizeString),
         start_time: isoDateSchema,
         duration: z.number().min(0),
       })

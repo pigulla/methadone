@@ -137,7 +137,7 @@ export class StreamController {
   @ApiOperation({
     summary: 'Start streaming a channel to the external player.',
     description:
-      'Start playback of the channel of the given network with the given key on the configured external player. The stream is the raw audio without any IceCast metadata. Any previously started stream is terminated.',
+      'Start playback of the channel of the given network with the given key on the configured external player. Any previously started stream is terminated.',
   })
   @ApiResponse({
     status: HttpStatus.ACCEPTED,

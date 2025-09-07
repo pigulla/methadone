@@ -10,7 +10,6 @@ export const audioAddictConfig = z
     baseUrl: z.httpUrl(),
     listeningKey: z.string().regex(/^[a-z0-9]{16}$/),
     format: z.enum(AUDIO_FORMAT),
-    useCache: z.boolean(),
     currentlyPlayingRefreshIntervalInSeconds: z
       .number()
       .positive()

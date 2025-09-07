@@ -7,7 +7,8 @@ export type ChannelServiceMock = Mocked<IChannelService>
 export function mockChannelService(): ChannelServiceMock {
   return {
     get: vi.fn(),
-    getCurrentlyPlaying: vi.fn(),
+    getCurrentlyPlayingOnChannel: vi.fn(),
+    getCurrentlyPlayingOnNetwork: vi.fn(),
     getAllForNetwork: vi.fn(),
   }
 }
