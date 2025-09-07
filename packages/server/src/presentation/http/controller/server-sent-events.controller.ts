@@ -1,13 +1,15 @@
 import { clearInterval, setInterval } from 'node:timers'
 
-import { createClientConnectedDTO } from '@methadone/dto/sse/connection/client.connected.dto.js'
-import { createClientDisconnectedDTO } from '@methadone/dto/sse/connection/client.disconnected.dto.js'
-import { createClientHeartbeatDTO } from '@methadone/dto/sse/connection/client.heartbeat.dto.js'
-import type { Event } from '@methadone/dto/sse/event.js'
-import { createStreamPlayingDTO } from '@methadone/dto/sse/stream/stream.playing.dto.js'
-import { createStreamStartedDTO } from '@methadone/dto/sse/stream/stream.started.dto.js'
-import { createStreamStoppedDTO } from '@methadone/dto/sse/stream/stream.stopped.dto.js'
-import { createStreamTrackDTO } from '@methadone/dto/sse/stream/stream.track.dto.js'
+import {
+  createClientConnectedDTO,
+  createClientDisconnectedDTO,
+  createClientHeartbeatDTO,
+  createStreamPlayingDTO,
+  createStreamStartedDTO,
+  createStreamStoppedDTO,
+  createStreamTrackDTO,
+  type Event,
+} from '@methadone/dto'
 
 import {
   Controller,

@@ -1,6 +1,6 @@
-import type { ChannelID } from '#domain/channel/channel.js'
+import type { ChannelID, NetworkID } from '@methadone/types'
+
 import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
-import type { NetworkID } from '#domain/network/network.js'
 
 export abstract class ICurrentlyPlayingRepository {
   public abstract deleteAll(): Promise<void>

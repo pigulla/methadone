@@ -1,8 +1,7 @@
+import { channelIdSchema, channelKeySchema, trackIdSchema } from '@methadone/types'
+
 import z from 'zod'
 
-import { channelIdSchema, channelKeySchema } from '#domain/channel/channel.schema.js'
-
-import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
 import { sanitizeString } from './sanitize-string.js'
 
@@ -12,7 +11,7 @@ export const currentlyPlayingDtoSchema = z.array(
     channel_key: channelKeySchema,
     track: z
       .strictObject({
-        id: idSchema,
+        id: trackIdSchema,
         display_artist: z.string().pipe(sanitizeString),
         display_title: z.string().pipe(sanitizeString),
         start_time: isoDateSchema,

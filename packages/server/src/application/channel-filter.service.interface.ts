@@ -1,5 +1,6 @@
-import { ChannelFilter, type ChannelFilterKey } from '#domain/channel-filter/channel-filter.js'
-import type { NetworkKey } from '#domain/network/network.js'
+import type { ChannelFilterKey, NetworkKey } from '@methadone/types'
+
+import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 
 export abstract class IChannelFilterService {
   public abstract get(

@@ -1,8 +1,9 @@
+import { channelIdSchema } from '@methadone/types'
+
 import dayjs, { type Dayjs } from 'dayjs'
 import type { Duration } from 'dayjs/plugin/duration.js'
 import z from 'zod'
 
-import { channelIdSchema } from '#domain/channel/channel.schema.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 
 export const currentlyPlayingRow = z

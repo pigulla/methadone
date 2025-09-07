@@ -18,9 +18,9 @@
     },
     "type": "module",
     "exports": {
-        "./*": {
-            "development": "./src/*",
-            "dist": "./dist/src/*"
+        ".": {
+            "development": "./src/index.js",
+            "default": "./dist/src/index.js"
         }
     },
     "scripts": {

@@ -1,17 +1,18 @@
+import { channelIdSchema, channelKeySchema, networkIdSchema } from '@methadone/types'
+
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
-import { idSchema } from './id.schema.js'
-import { keySchema } from './key.schema.js'
-
 export const channelDtoSchema = z.object({
-  id: idSchema,
-  key: keySchema,
-  networkId: idSchema,
+  id: channelIdSchema,
+  key: channelKeySchema,
+  networkId: networkIdSchema,
   name: z.string().min(1),
   director: z.string(),
   description: z.string(),
 })
+
+export const channelsDtoSchema = z.array(channelDtoSchema)
 
 export class ChannelDTO extends createZodDto(channelDtoSchema) {}
 

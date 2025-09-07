@@ -1,8 +1,9 @@
+import type { ChannelFilterKey, NetworkKey } from '@methadone/types'
+
 import { Injectable } from '@nestjs/common'
 
-import type { ChannelFilter, ChannelFilterKey } from '#domain/channel-filter/channel-filter.js'
+import type { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { IChannelFilterRepository } from '#domain/channel-filter/channel-filter.repository.interface.js'
-import type { NetworkKey } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 import { Transactional } from '#domain/transactional.js'
 

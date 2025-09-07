@@ -1,6 +1,6 @@
-import { EntityNotFoundError } from '../entity-not-found.error.js'
+import type { ChannelID, ChannelKey } from '@methadone/types'
 
-import type { ChannelID, ChannelKey } from './channel.js'
+import { EntityNotFoundError } from '../entity-not-found.error.js'
 
 export class ChannelNotFoundError extends EntityNotFoundError {
   public constructor(identifier: ChannelID | ChannelKey) {

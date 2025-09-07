@@ -1,8 +1,4 @@
-/** biome-ignore-all lint/suspicious/noConsole: Just testing */
-
-import type { ChannelDTO } from '@methadone/dto/http/channel.dto.js'
-import type { NetworkDTO } from '@methadone/dto/http/network.dto.js'
-import { eventSchema } from '@methadone/dto/sse/event.js'
+import { type ChannelDTO, eventSchema, type NetworkDTO } from '@methadone/dto/'
 
 import { createEventSource, type EventSourceMessage } from 'eventsource-client'
 import { execaSync } from 'execa'

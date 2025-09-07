@@ -1,6 +1,6 @@
-import { EntityNotFoundError } from '../entity-not-found.error.js'
+import type { NetworkID, NetworkKey } from '@methadone/types'
 
-import type { NetworkID, NetworkKey } from './network.js'
+import { EntityNotFoundError } from '../entity-not-found.error.js'
 
 export class NetworkNotFoundError extends EntityNotFoundError {
   public constructor(identifier: NetworkID | NetworkKey) {

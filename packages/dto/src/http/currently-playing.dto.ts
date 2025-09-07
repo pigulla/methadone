@@ -1,7 +1,7 @@
+import { channelIdSchema } from '@methadone/types'
+
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
-
-import { idSchema } from './id.schema.js'
 
 export const currentlyPlayingDtoSchema = z.object({
   track: z
@@ -37,7 +37,7 @@ export function createCurrentlyPlayingDTO(
 }
 
 export const currentlyPlayingOnChannelDtoSchema = z.object({
-  channelId: idSchema,
+  channelId: channelIdSchema,
   currentlyPlaying: currentlyPlayingDtoSchema.nullable(),
 })
 

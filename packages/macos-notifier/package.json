@@ -20,7 +20,7 @@
     "exports": {
         "./*": {
             "development": "./src/*",
-            "dist": "./dist/src/*"
+            "default": "./dist/src/*"
         }
     },
     "scripts": {

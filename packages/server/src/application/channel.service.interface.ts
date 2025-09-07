@@ -1,6 +1,7 @@
-import { Channel, type ChannelID, type ChannelKey } from '#domain/channel/channel.js'
+import type { ChannelID, ChannelKey, NetworkKey } from '@methadone/types'
+
+import { Channel } from '#domain/channel/channel.js'
 import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
-import type { NetworkKey } from '#domain/network/network.js'
 
 export abstract class IChannelService {
   public abstract get(networkKey: NetworkKey, channelKey: ChannelKey): Promise<Channel>

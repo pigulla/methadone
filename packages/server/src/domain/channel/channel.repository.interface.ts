@@ -1,6 +1,6 @@
-import type { NetworkID } from '../network/network.js'
+import type { ChannelID, ChannelKey, NetworkID } from '@methadone/types'
 
-import type { Channel, ChannelID, ChannelKey } from './channel.js'
+import type { Channel } from './channel.js'
 
 export abstract class IChannelRepository {
   public abstract getByID(channelId: ChannelID): Promise<Channel>

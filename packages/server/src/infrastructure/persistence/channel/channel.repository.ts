@@ -1,12 +1,13 @@
 import { join } from 'node:path'
 
+import type { ChannelID, ChannelKey, NetworkID } from '@methadone/types'
+
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { TransactionHost } from '@nestjs-cls/transactional'
 
-import type { Channel, ChannelID, ChannelKey } from '#domain/channel/channel.js'
+import type { Channel } from '#domain/channel/channel.js'
 import type { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
 import { ChannelNotFoundError } from '#domain/channel/channel-not-found.error.js'
-import type { NetworkID } from '#domain/network/network.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
 import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'

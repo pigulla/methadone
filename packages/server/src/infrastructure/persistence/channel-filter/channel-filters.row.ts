@@ -1,12 +1,13 @@
-import z from 'zod'
-
-import { channelIdSchema } from '#domain/channel/channel.schema.js'
-import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import {
   channelFilterIdSchema,
   channelFilterKeySchema,
-} from '#domain/channel-filter/channel-filter.schema.js'
-import { networkIdSchema } from '#domain/network/network.schema.js'
+  channelIdSchema,
+  networkIdSchema,
+} from '@methadone/types'
+
+import z from 'zod'
+
+import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 
 export const channelFiltersRow = z
   .strictObject({

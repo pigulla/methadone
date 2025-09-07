@@ -1,16 +1,8 @@
+import { asNetworkID, asNetworkKey, type NetworkID, type NetworkKey } from '@methadone/types'
+
 import type { JsonObject } from 'type-fest'
-import z from 'zod'
 
-import {
-  asNetworkID,
-  asNetworkKey,
-  networkIdSchema,
-  networkKeySchema,
-  networkSchema,
-} from './network.schema.js'
-
-export type NetworkID = z.infer<typeof networkIdSchema>
-export type NetworkKey = z.infer<typeof networkKeySchema>
+import { networkSchema } from './network.schema.js'
 
 export class Network {
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Disable structural typing.

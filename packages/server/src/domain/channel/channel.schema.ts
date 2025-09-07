@@ -1,24 +1,6 @@
 import z from 'zod'
-
-import { networkIdSchema } from '#domain/network/network.schema.js'
-
-import type { ChannelID, ChannelKey } from './channel.js'
-
-export const channelIdSchema = z.number().int().positive().brand('channel-id')
-
-export function asChannelID(value: number): ChannelID {
-  return channelIdSchema.parse(value)
-}
-
-export const channelKeySchema = z
-  .string()
-  .regex(/^[_a-z0-9]+$/)
-  .brand('channel-key')
-
-export function asChannelKey(value: string): ChannelKey {
-  return channelKeySchema.parse(value)
-}
-
+import {networkIdSchema, channelIdSchema, channelKeySchema} from "@methadone/types";
+ 
 export const channelSchema = z
   .strictObject({
     id: channelIdSchema,

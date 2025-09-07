@@ -1,13 +1,13 @@
 import { join } from 'node:path'
 
+import type { ChannelID, NetworkID } from '@methadone/types'
+
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { TransactionHost } from '@nestjs-cls/transactional'
 
-import type { ChannelID } from '#domain/channel/channel.js'
 import { ChannelNotFoundError } from '#domain/channel/channel-not-found.error.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import type { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
-import type { NetworkID } from '#domain/network/network.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
 
 import { AbstractRepository } from '../abstract.repository.js'

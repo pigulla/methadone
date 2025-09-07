@@ -1,14 +1,16 @@
-import { ChannelFilterDTO, createChannelFilterDTO } from '@methadone/dto/http/channel-filter.dto.js'
+import { ChannelFilterDTO, createChannelFilterDTO } from '@methadone/dto'
+import {
+  type ChannelFilterKey,
+  channelFilterKeySchema,
+  type NetworkKey,
+  networkKeySchema,
+} from '@methadone/types'
 
 import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'
 import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
 import { IChannelFilterService } from '#application/channel-filter.service.interface.js'
-import type { ChannelFilterKey } from '#domain/channel-filter/channel-filter.js'
-import { channelFilterKeySchema } from '#domain/channel-filter/channel-filter.schema.js'
-import type { NetworkKey } from '#domain/network/network.js'
-import { networkKeySchema } from '#domain/network/network.schema.js'
 import { ApiKeyGuard } from '#presentation/http/api-key.guard.js'
 
 @Controller()

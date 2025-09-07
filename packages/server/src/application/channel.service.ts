@@ -1,10 +1,11 @@
+import type { ChannelID, ChannelKey, NetworkKey } from '@methadone/types'
+
 import { Injectable } from '@nestjs/common'
 
-import { Channel, type ChannelID, type ChannelKey } from '#domain/channel/channel.js'
+import { Channel } from '#domain/channel/channel.js'
 import { IChannelRepository } from '#domain/channel/channel.repository.interface.js'
 import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
-import type { NetworkKey } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 import { Transactional } from '#domain/transactional.js'
 

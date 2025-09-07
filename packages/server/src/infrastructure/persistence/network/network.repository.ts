@@ -1,9 +1,11 @@
 import { join } from 'node:path'
 
+import type { NetworkID, NetworkKey } from '@methadone/types'
+
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { TransactionHost } from '@nestjs-cls/transactional'
 
-import type { Network, NetworkID, NetworkKey } from '#domain/network/network.js'
+import type { Network } from '#domain/network/network.js'
 import type { INetworkRepository } from '#domain/network/network.repository.interface.js'
 import { NetworkNotFoundError } from '#domain/network/network-not-found.error.js'
 

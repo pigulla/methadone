@@ -1,6 +1,8 @@
+import type { NetworkKey } from '@methadone/types'
+
 import { Injectable } from '@nestjs/common'
 
-import { Network, type NetworkKey } from '#domain/network/network.js'
+import { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 import { Transactional } from '#domain/transactional.js'
 

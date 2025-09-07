@@ -1,29 +1,33 @@
-import { keySchema } from '@methadone/dto/http/key.schema.js'
+import {
+  channelFilterIdSchema,
+  channelIdSchema,
+  channelKeySchema,
+  networkIdSchema,
+} from '@methadone/types'
 
 import z from 'zod'
 
-import { channelFilterIdSchema } from '#domain/channel-filter/channel-filter.schema.js'
-
-import { idSchema } from './id.schema.js'
 import { isoDateSchema } from './iso-date.schema.js'
 import { protocollessUrlTemplateSchema } from './protocolless-url-template.schema.js'
 import { sanitizeString } from './sanitize-string.js'
 
 export const channelDtoSchema = z.object({
-  id: idSchema,
+  id: channelIdSchema,
   channel_director: z.string().pipe(sanitizeString),
   description_long: z.string().pipe(sanitizeString),
   description_short: z.string().pipe(sanitizeString),
-  key: keySchema,
+  key: channelKeySchema,
   name: z.string().min(1).pipe(sanitizeString),
   public: z.boolean(),
-  network_id: idSchema,
+  network_id: networkIdSchema,
   asset_url: protocollessUrlTemplateSchema.nullable(),
   banner_url: protocollessUrlTemplateSchema.nullable(),
   description: z.string().pipe(sanitizeString),
   created_at: isoDateSchema,
   updated_at: isoDateSchema,
-  similar_channels: z.array(z.strictObject({ id: idSchema, similar_channel_id: idSchema })),
+  similar_channels: z.array(
+    z.strictObject({ id: channelIdSchema, similar_channel_id: channelIdSchema }),
+  ),
   images: z
     .strictObject({
       horizontal_banner: protocollessUrlTemplateSchema,

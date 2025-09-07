@@ -1,4 +1,6 @@
-import { Network, type NetworkKey } from '#domain/network/network.js'
+import type { NetworkKey } from '@methadone/types'
+
+import { Network } from '#domain/network/network.js'
 
 export abstract class INetworkService {
   public abstract get(key: NetworkKey): Promise<Network>

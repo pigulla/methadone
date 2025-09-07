@@ -1,4 +1,12 @@
-import { NetworkDTO, networkDtoSchema } from '@methadone/dto'
+import {
+  ChannelDTO,
+  ChannelFilterDTO,
+  channelFiltersDtoSchema,
+  channelsDtoSchema,
+  NetworkDTO,
+  networksDtoSchema,
+} from '@methadone/dto'
+import type { NetworkKey } from '@methadone/types'
 
 import type { KyInstance } from 'ky'
 import ky from 'ky'
@@ -15,9 +23,21 @@ export class Client {
     this.ky = ky.extend({ prefixUrl: url })
   }
 
-  public async getNetworks(): Promise<NetworkDTO> {
+  public async getNetworks(): Promise<NetworkDTO[]> {
     const response = await this.ky.get('networks').json<JsonValue>()
 
-    return networkDtoSchema.parse(response)
+    return networksDtoSchema.parse(response)
+  }
+
+  public async getChannels(networkKey: NetworkKey): Promise<ChannelDTO[]> {
+    const response = await this.ky.get(`networks/${networkKey}/channels`).json<JsonValue>()
+
+    return channelsDtoSchema.parse(response)
+  }
+
+  public async getChannelFilters(networkKey: NetworkKey): Promise<ChannelFilterDTO[]> {
+    const response = await this.ky.get(`networks/${networkKey}/channel-filters`).json<JsonValue>()
+
+    return channelFiltersDtoSchema.parse(response)
   }
 }

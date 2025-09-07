@@ -1,15 +1,16 @@
+import { networkIdSchema, networkKeySchema } from '@methadone/types'
+
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'
 
-import { idSchema } from './id.schema.js'
-import { keySchema } from './key.schema.js'
-
 export const networkDtoSchema = z.object({
-  id: idSchema,
-  key: keySchema,
+  id: networkIdSchema,
+  key: networkKeySchema,
   name: z.string().min(1),
   url: z.httpUrl(),
 })
+
+export const networksDtoSchema = z.array(networkDtoSchema)
 
 export class NetworkDTO extends createZodDto(networkDtoSchema) {}
 

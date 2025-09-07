@@ -1,4 +1,10 @@
 import { createStreamInformationDTO, StreamInformationDTO } from '@methadone/dto'
+import {
+  type ChannelKey,
+  channelKeySchema,
+  type NetworkKey,
+  networkKeySchema,
+} from '@methadone/types'
 
 import {
   Controller,
@@ -19,10 +25,6 @@ import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 import { IChannelService } from '#application/channel.service.interface.js'
 import { IStreamManager } from '#application/stream-manager.interface.js'
 import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
-import type { ChannelKey } from '#domain/channel/channel.js'
-import { channelKeySchema } from '#domain/channel/channel.schema.js'
-import type { NetworkKey } from '#domain/network/network.js'
-import { networkKeySchema } from '#domain/network/network.schema.js'
 import { ApiKeyGuard } from '#presentation/http/api-key.guard.js'
 
 const audioFormatMap: Readonly<Record<AudioFormat, string>> = {

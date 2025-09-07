@@ -1,8 +1,8 @@
+import { channelIdSchema, channelKeySchema, networkIdSchema } from '@methadone/types'
+
 import z from 'zod'
 
 import { Channel } from '#domain/channel/channel.js'
-import { channelIdSchema, channelKeySchema } from '#domain/channel/channel.schema.js'
-import { networkIdSchema } from '#domain/network/network.schema.js'
 
 export const channelsViewRow = z
   .strictObject({

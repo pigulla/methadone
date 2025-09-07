@@ -1,11 +1,13 @@
+import type { ChannelID, NetworkKey } from '@methadone/types'
+
 import { Inject, Injectable } from '@nestjs/common'
 import { type Got, got } from 'got'
 import type { JsonValue } from 'type-fest'
 
-import { Channel, type ChannelID } from '#domain/channel/channel.js'
+import { Channel } from '#domain/channel/channel.js'
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
-import { Network, type NetworkKey } from '#domain/network/network.js'
+import { Network } from '#domain/network/network.js'
 import { listenUrlsDtoSchema } from '#infrastructure/audio-addict/api/dto/listen-urls.dto.js'
 
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'

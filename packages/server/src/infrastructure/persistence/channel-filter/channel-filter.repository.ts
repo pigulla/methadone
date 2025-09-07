@@ -1,16 +1,13 @@
 import { join } from 'node:path'
 
+import type { ChannelFilterID, ChannelFilterKey, NetworkID } from '@methadone/types'
+
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { TransactionHost } from '@nestjs-cls/transactional'
 
-import type {
-  ChannelFilter,
-  ChannelFilterID,
-  ChannelFilterKey,
-} from '#domain/channel-filter/channel-filter.js'
+import type { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import type { IChannelFilterRepository } from '#domain/channel-filter/channel-filter.repository.interface.js'
 import { ChannelFilterNotFoundError } from '#domain/channel-filter/channel-filter-not-found.error.js'
-import type { NetworkID } from '#domain/network/network.js'
 
 import { AbstractRepository } from '../abstract.repository.js'
 import { TransactionalAdapterPglite } from '../transactional-adapter-pglite.js'

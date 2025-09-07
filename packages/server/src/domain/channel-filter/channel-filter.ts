@@ -1,22 +1,17 @@
-import type { JsonObject } from 'type-fest'
-import z from 'zod'
-
-import { asChannelID } from '#domain/channel/channel.schema.js'
-
-import type { ChannelID } from '../channel/channel.js'
-import type { NetworkID } from '../network/network.js'
-import { asNetworkID } from '../network/network.schema.js'
-
 import {
   asChannelFilterID,
   asChannelFilterKey,
-  channelFilterIdSchema,
-  channelFilterKeySchema,
-  channelFilterSchema,
-} from './channel-filter.schema.js'
+  asChannelID,
+  asNetworkID,
+  type ChannelFilterID,
+  type ChannelFilterKey,
+  type ChannelID,
+  type NetworkID,
+} from '@methadone/types'
 
-export type ChannelFilterID = z.infer<typeof channelFilterIdSchema>
-export type ChannelFilterKey = z.infer<typeof channelFilterKeySchema>
+import type { JsonObject } from 'type-fest'
+
+import { channelFilterSchema } from './channel-filter.schema.js'
 
 export class ChannelFilter {
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: Disable structural typing.

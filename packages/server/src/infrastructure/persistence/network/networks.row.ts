@@ -1,7 +1,8 @@
+import { networkIdSchema, networkKeySchema } from '@methadone/types'
+
 import z from 'zod'
 
 import { Network } from '#domain/network/network.js'
-import { networkIdSchema, networkKeySchema } from '#domain/network/network.schema.js'
 
 export const networksRow = z
   .strictObject({
