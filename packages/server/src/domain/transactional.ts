@@ -1,5 +1,4 @@
 import { Transactional as NestjsClsTransactional } from '@nestjs-cls/transactional'
+import { TransactionalAdapterKysely } from '@nestjs-cls/transactional-adapter-kysely'
 
-import type { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
-
-export const Transactional = NestjsClsTransactional<TransactionalAdapterPglite>
+export const Transactional = NestjsClsTransactional<TransactionalAdapterKysely>

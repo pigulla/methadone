@@ -1,36 +1,14 @@
-import type { OnModuleInit } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { TransactionHost } from '@nestjs-cls/transactional'
+import type { TransactionalAdapterKysely } from '@nestjs-cls/transactional-adapter-kysely'
 
-import { TransactionalAdapterPglite } from '#infrastructure/persistence/transactional-adapter-pglite.js'
+import type { DatabaseType } from '#infrastructure/persistence/types.js'
 
-import { type PreparedStatements, prepareStatements } from './prepare-statements.js'
+@Injectable()
+export abstract class AbstractRepository {
+  protected readonly txHost: TransactionHost<TransactionalAdapterKysely<DatabaseType>>
 
-export abstract class AbstractRepository<T extends string[]> implements OnModuleInit {
-  protected readonly txHost: TransactionHost<TransactionalAdapterPglite>
-
-  private readonly directory: string
-  private readonly fileNames: readonly string[]
-  private statements: PreparedStatements<T> | null
-
-  protected constructor(
-    txHost: TransactionHost<TransactionalAdapterPglite>,
-    { directory, fileNames }: { directory: string; fileNames: T },
-  ) {
+  protected constructor(txHost: TransactionHost<TransactionalAdapterKysely<DatabaseType>>) {
     this.txHost = txHost
-    this.directory = directory
-    this.fileNames = [...fileNames]
-    this.statements = null
-  }
-
-  public async onModuleInit(): Promise<void> {
-    this.statements = await prepareStatements(this.directory, this.fileNames)
-  }
-
-  protected get stmt(): PreparedStatements<T> {
-    if (this.statements === null) {
-      throw new Error('Not initialized')
-    }
-
-    return this.statements
   }
 }
