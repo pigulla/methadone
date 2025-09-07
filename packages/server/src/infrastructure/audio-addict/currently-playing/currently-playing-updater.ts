@@ -59,6 +59,7 @@ export class CurrentlyPlayingUpdater
     }
   }
 
+  // FIXME: The transaction occasionally hangs :-/
   @Transactional()
   public async update(): Promise<void> {
     this.logger.verbose('Updating "currently playing" data')
@@ -73,6 +74,7 @@ export class CurrentlyPlayingUpdater
     for (const [channelId, item] of currentlyPlaying) {
       await this.nowPlayingRepository.upsert(channelId, item)
     }
+
     this.logger.log(
       `Successfully updated "currently playing" data for ${currentlyPlaying.length} channel(s)`,
     )

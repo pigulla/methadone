@@ -26,7 +26,7 @@ export class TransactionalAdapterPglite
   }
 
   public optionsFactory(
-    instance: IDatabase,
+    database: IDatabase,
   ): TransactionalAdapterOptions<Connection, PgliteTxOptions> {
     return {
       wrapWithTransaction(
@@ -34,7 +34,7 @@ export class TransactionalAdapterPglite
         fn: (...args: unknown[]) => Promise<unknown>,
         setTx: (tx: Transaction) => void,
       ): Promise<unknown> {
-        return instance.instance.transaction(async tx => {
+        return database.instance.transaction(async tx => {
           setTx(tx)
 
           if (options.deferConstraints) {
@@ -45,7 +45,8 @@ export class TransactionalAdapterPglite
         })
       },
       getFallbackInstance(): Connection {
-        return instance.instance
+        console.warn('FALLBACK INSTANCE')
+        return database.instance
       },
     }
   }

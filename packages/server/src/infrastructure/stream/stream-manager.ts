@@ -13,6 +13,7 @@ import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js
 import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 import type { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
+import { Transactional } from '#domain/transactional.js'
 
 import { IAudioAddictAPI } from '../audio-addict/api/audio-addict-api.interface.js'
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../config/audio-addict.config.js'
@@ -92,6 +93,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     this.eventEmitter.emit(event.name, event)
   }
 
+  @Transactional()
   public async start(channel: Channel, destination: Writable = this.stream): Promise<void> {
     const [network, icecastTransformStream] = await Promise.all([
       this.networkRepository.getByID(channel.networkId),

@@ -4,6 +4,7 @@ import type { ChannelFilter, ChannelFilterKey } from '#domain/channel-filter/cha
 import { IChannelFilterRepository } from '#domain/channel-filter/channel-filter.repository.interface.js'
 import type { NetworkKey } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
+import { Transactional } from '#domain/transactional.js'
 
 import type { IChannelFilterService } from './channel-filter.service.interface.js'
 
@@ -20,6 +21,7 @@ export class ChannelFilterService implements IChannelFilterService {
     this.networkRepository = networkRepository
   }
 
+  @Transactional()
   public async get(
     networkKey: NetworkKey,
     channelFilterKey: ChannelFilterKey,
@@ -28,10 +30,12 @@ export class ChannelFilterService implements IChannelFilterService {
     return this.channelFilterRepository.getByKeyForNetwork(network.id, channelFilterKey)
   }
 
+  @Transactional()
   public getAll(): Promise<ChannelFilter[]> {
     return this.channelFilterRepository.getAll()
   }
 
+  @Transactional()
   public async getAllForNetwork(networkKey: NetworkKey): Promise<ChannelFilter[]> {
     const network = await this.networkRepository.getByKey(networkKey)
     return this.channelFilterRepository.getAllForNetwork(network.id)

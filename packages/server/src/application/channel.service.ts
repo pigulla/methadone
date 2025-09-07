@@ -6,6 +6,7 @@ import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playi
 import { ICurrentlyPlayingRepository } from '#domain/currently-playing/currently-playing.repository.interface.js'
 import type { NetworkKey } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
+import { Transactional } from '#domain/transactional.js'
 
 import type { IChannelService } from './channel.service.interface.js'
 
@@ -25,6 +26,7 @@ export class ChannelService implements IChannelService {
     this.networkRepository = networkRepository
   }
 
+  @Transactional()
   public async getCurrentlyPlaying(
     networkKey: NetworkKey,
     channelKey: ChannelKey,
@@ -35,12 +37,14 @@ export class ChannelService implements IChannelService {
     return this.currentlyPlayingRepository.get(channel.id)
   }
 
+  @Transactional()
   public async get(networkKey: NetworkKey, channelKey: ChannelKey): Promise<Channel> {
     const network = await this.networkRepository.getByKey(networkKey)
 
     return this.channelRepository.getByKeyForNetwork(network.id, channelKey)
   }
 
+  @Transactional()
   public async getAllForNetwork(networkKey: NetworkKey): Promise<Channel[]> {
     const network = await this.networkRepository.getByKey(networkKey)
 
