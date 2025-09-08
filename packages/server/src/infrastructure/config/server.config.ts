@@ -10,7 +10,8 @@ export const serverConfig = z
       z.literal(false),
       z
         .string()
-        .length(8)
+        .min(8)
+        .max(32)
         .regex(/^[a-f0-9]+$/),
     ]),
     enableCors: z.boolean(),

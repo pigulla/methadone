@@ -20,7 +20,10 @@ export class Client {
   public constructor(options: Options) {
     const { url } = optionsSchema.parse(options)
 
-    this.ky = ky.extend({ prefixUrl: url })
+    this.ky = ky.extend({
+      prefixUrl: url,
+      headers: options.apiKey === false ? {} : { 'x-api-key': options.apiKey },
+    })
   }
 
   public async getNetworks(): Promise<NetworkDTO[]> {

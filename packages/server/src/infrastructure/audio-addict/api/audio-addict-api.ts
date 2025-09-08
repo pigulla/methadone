@@ -1,7 +1,8 @@
 import type { ChannelID, NetworkKey } from '@methadone/types'
 
 import { Inject, Injectable } from '@nestjs/common'
-import { type Got, got } from 'got'
+import { type Got, got, Options } from 'got'
+import { KeyvFile } from 'keyv-file'
 import type { JsonValue } from 'type-fest'
 
 import { Channel } from '#domain/channel/channel.js'
@@ -28,10 +29,19 @@ export class AudioAddictAPI implements IAudioAddictAPI {
 
   public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig) {
     this.http = got.extend({
-      // Using Got's built-in ETag-based cache would be nice. Unfortunately, there seems to be some strange bug in there
-      // somewhere that causes requests to occasionally hang for no apparent reason. This happens with both 'new Map()'
-      // and keyf-file. No clue what's going on here.
+      cache: config.cache ? new KeyvFile() : false,
       prefixUrl: config.baseUrl,
+      hooks: {
+        beforeRequest: config.cache
+          ? [
+              // There's a bug in Got that causes requests to hang indefinitely when a 304 Not Modified is returned and
+              // the content is compressed. (See: https://github.com/sindresorhus/got/issues/2410)
+              (options: Options): void => {
+                options.headers['accept-encoding'] = ''
+              },
+            ]
+          : [],
+      },
     })
   }
 

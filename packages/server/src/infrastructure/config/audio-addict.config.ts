@@ -14,6 +14,7 @@ export const audioAddictConfig = z
       .number()
       .positive()
       .transform(value => dayjs.duration(value, 'seconds')),
+    cache: z.boolean(),
   })
   .transform(value => {
     const { currentlyPlayingRefreshIntervalInSeconds, ...others } = value
