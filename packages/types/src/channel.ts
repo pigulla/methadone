@@ -13,6 +13,6 @@ export function asChannelID(value: number): ChannelID {
 export const channelKeySchema = keySchema.brand('channel-key')
 export type ChannelKey = z.infer<typeof channelKeySchema>
 
-export function asChannelKey(value: string): ChannelKey {
+export function asChannelKey(value: unknown): ChannelKey {
   return channelKeySchema.parse(value)
 }

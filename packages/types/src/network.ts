@@ -13,6 +13,6 @@ export function asNetworkID(value: number): NetworkID {
 export const networkKeySchema = keySchema.brand('network-key')
 export type NetworkKey = z.infer<typeof networkKeySchema>
 
-export function asNetworkKey(value: string): NetworkKey {
+export function asNetworkKey(value: unknown): NetworkKey {
   return networkKeySchema.parse(value)
 }
