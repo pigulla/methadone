@@ -24,14 +24,7 @@ import { ZodResponse, ZodValidationPipe } from 'nestjs-zod'
 
 import { IChannelService } from '#application/channel.service.interface.js'
 import { IStreamManager } from '#application/stream-manager.interface.js'
-import { AUDIO_FORMAT, type AudioFormat } from '#domain/audio-format.js'
 import { ApiKeyGuard } from '#presentation/http/api-key.guard.js'
-
-const audioFormatMap: Readonly<Record<AudioFormat, string>> = {
-  [AUDIO_FORMAT.MP3_320]: 'audio/mpeg',
-  [AUDIO_FORMAT.AAC_128]: 'audio/aac',
-  [AUDIO_FORMAT.AAC_64]: 'audio/aac',
-}
 
 @Controller('stream')
 @UseGuards(ApiKeyGuard)
@@ -124,7 +117,7 @@ export class StreamController {
     channelKey: ChannelKey,
     @Res() response: Response,
   ): Promise<void> {
-    response.set('content-type', audioFormatMap[this.streamManager.format])
+    response.set('Content-Type', this.streamManager.mimeType)
     const channel = await this.channelService.get(networkKey, channelKey)
     await this.streamManager.start(channel, response)
   }

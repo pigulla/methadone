@@ -6,7 +6,6 @@ import { ModuleRef } from '@nestjs/core'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 
 import { IStreamManager, type StreamInformation } from '#application/stream-manager.interface.js'
-import type { AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
 import type { StreamEvent } from '#domain/event/stream/stream.event.js'
 import { StreamStartedEvent } from '#domain/event/stream/stream.started.event.js'
@@ -14,6 +13,7 @@ import { StreamTrackEvent } from '#domain/event/stream/stream.track.event.js'
 import type { Network } from '#domain/network/network.js'
 import { INetworkRepository } from '#domain/network/network.repository.interface.js'
 import { Transactional } from '#domain/transactional.js'
+import { getMimetypeForQuality } from '#infrastructure/stream/get-mimetype-for-quality.js'
 
 import { IAudioAddictAPI } from '../audio-addict/api/audio-addict-api.interface.js'
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../config/audio-addict.config.js'
@@ -22,8 +22,7 @@ import { IIcecastTransformStream } from './icecast-transform-stream.interface.js
 
 @Injectable()
 export class StreamManager implements IStreamManager, OnModuleDestroy {
-  public readonly format: AudioFormat
-  public readonly stream: PassThrough
+  public readonly mimeType: string
 
   private readonly logger = new Logger(StreamManager.name)
   private readonly audioAddictApi: IAudioAddictAPI
@@ -31,6 +30,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
   private readonly config: AudioAddictConfig
   private readonly moduleRef: ModuleRef
   private readonly eventEmitter: EventEmitter2
+  private readonly passThroughStream: PassThrough
 
   private active: {
     network: Network
@@ -46,14 +46,14 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     eventEmitter: EventEmitter2,
     moduleRef: ModuleRef,
   ) {
-    this.format = config.format
+    this.mimeType = getMimetypeForQuality(config.quality)
     this.networkRepository = networkRepository
     this.config = config
     this.audioAddictApi = audioAddictApi
     this.eventEmitter = eventEmitter
     this.moduleRef = moduleRef
     this.active = null
-    this.stream = new PassThrough()
+    this.passThroughStream = new PassThrough()
   }
 
   public onModuleDestroy(): void {
@@ -65,7 +65,6 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
       return
     }
 
-    this.logger.log('Stopping stream')
     this.active.socket.unpipe()
     this.active.socket.destroy()
 
@@ -93,8 +92,16 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     this.eventEmitter.emit(event.name, event)
   }
 
+  public stream(channel: Channel): Promise<void> {
+    return this.start(channel, this.passThroughStream)
+  }
+
+  public streamTo(channel: Channel, stream: Writable): Promise<void> {
+    return this.start(channel, stream)
+  }
+
   @Transactional()
-  public async start(channel: Channel, destination: Writable = this.stream): Promise<void> {
+  private async start(channel: Channel, destination: Writable): Promise<void> {
     const [network, icecastTransformStream] = await Promise.all([
       this.networkRepository.getByID(channel.networkId),
       this.moduleRef.resolve(IIcecastTransformStream),
@@ -106,10 +113,11 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     const port =
       url.port === '' ? (url.protocol === 'https:' ? 443 : 80) : Number.parseInt(url.port, 10)
 
+    // TODO: This needs error handling (i.e., 401s).
     const socket = connect(port, url.hostname, () => {
       socket.pipe(icecastTransformStream).pipe(destination)
       socket.write(
-        [`GET ${url.pathname}?${this.config.listeningKey} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join(
+        [`GET ${url.pathname}?${this.config.listenKey} HTTP/1.0`, 'Icy-MetaData:1', '', ''].join(
           '\r\n',
         ),
       )
@@ -122,7 +130,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
       socket,
     }
 
-    this.logger.log({ channel: channel.key }, 'Stream started')
+    this.logger.log({ channel: channel.key, url: url.toString() }, 'Stream started')
     this.emit(new StreamStartedEvent({ network, channel }))
   }
 }

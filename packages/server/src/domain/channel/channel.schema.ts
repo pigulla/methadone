@@ -1,6 +1,7 @@
+import { channelIdSchema, channelKeySchema, networkIdSchema } from '@methadone/types'
+
 import z from 'zod'
-import {networkIdSchema, channelIdSchema, channelKeySchema} from "@methadone/types";
- 
+
 export const channelSchema = z
   .strictObject({
     id: channelIdSchema,

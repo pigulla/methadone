@@ -1,15 +1,15 @@
 import dayjs from 'dayjs'
 import { z } from 'zod'
 
-import { AUDIO_FORMAT } from '#domain/audio-format.js'
+import { QUALITY } from '#domain/quality.js'
 
 export const AUDIO_ADDICT_CONFIG = Symbol('audio-addict-config')
 
 export const audioAddictConfig = z
   .strictObject({
     baseUrl: z.httpUrl(),
-    listeningKey: z.string().regex(/^[a-z0-9]{16}$/),
-    format: z.enum(AUDIO_FORMAT),
+    listenKey: z.string().regex(/^[a-z0-9]{16}$/),
+    quality: z.enum(QUALITY),
     currentlyPlayingRefreshIntervalInSeconds: z
       .number()
       .positive()

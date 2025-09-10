@@ -13,4 +13,5 @@ export abstract class IAudioAddictAPI {
     key: NetworkKey,
   ): Promise<Map<ChannelID, CurrentlyPlaying | null>>
   public abstract getStreamURL(networkKey: NetworkKey, channel: Channel): Promise<string>
+  public abstract ping(): Promise<void>
 }

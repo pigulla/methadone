@@ -32,14 +32,15 @@
     },
     "audioAddict": {
         "baseUrl": "https://api.audioaddict.com",
-        "listeningKey": "",
-        "format": "mp3-320",
+        "listenKey": "",
+        "quality": "mp3-excellent",
         "currentlyPlayingRefreshIntervalInSeconds": 15,
         "cache": true
     },
     "externalPlayer": {
         "path": "",
-        "options": []
+        "options": [],
+        "probeOptions": null
     },
     "application": {
         "heartbeatIntervalInSeconds": 15

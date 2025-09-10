@@ -4,6 +4,7 @@ import {
   Logger,
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
+  type OnModuleInit,
 } from '@nestjs/common'
 import { ExecaError, execa, type ResultPromise } from 'execa'
 
@@ -16,7 +17,9 @@ import {
 } from '../config/external-player.config.js'
 
 @Injectable()
-export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplicationShutdown {
+export class ExternalPlayer
+  implements IPlayer, OnApplicationBootstrap, OnModuleInit, OnApplicationShutdown
+{
   private readonly logger = new Logger(ExternalPlayer.name)
   private readonly streamProvider: IStreamManager
   private readonly config: ExternalPlayerConfig
@@ -31,12 +34,35 @@ export class ExternalPlayer implements IPlayer, OnApplicationBootstrap, OnApplic
     this.player = null
   }
 
+  public async onModuleInit(): Promise<void> {
+    await this.probe()
+  }
+
   public async onApplicationBootstrap(): Promise<void> {
     await this.launch()
   }
 
   public onApplicationShutdown(_signal?: string): void {
     this.terminate()
+  }
+
+  private async probe(): Promise<void> {
+    const { path, probeOptions } = this.config
+
+    if (probeOptions === null) {
+      return
+    }
+
+    try {
+      await execa(path, probeOptions, { all: true })
+    } catch (error) {
+      if (error instanceof ExecaError) {
+        this.logger.error({ output: error.all }, 'Failed to probe external player')
+        throw new Error('Failed to probe external player')
+      }
+
+      throw error
+    }
   }
 
   private async launch(): Promise<void> {

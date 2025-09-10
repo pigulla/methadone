@@ -3,6 +3,6 @@
         "apiKey": "METHADONE_API_KEY"
     },
     "audioAddict": {
-        "listeningKey": "AUDIOADDICT_LISTENING_KEY"
+        "listenKey": "METHADONE_LISTEN_KEY"
     }
 }

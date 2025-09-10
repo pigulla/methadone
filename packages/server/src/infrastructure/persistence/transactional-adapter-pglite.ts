@@ -45,7 +45,6 @@ export class TransactionalAdapterPglite
         })
       },
       getFallbackInstance(): Connection {
-        console.warn('FALLBACK INSTANCE')
         return database.instance
       },
     }

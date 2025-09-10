@@ -6,6 +6,7 @@ export const externalPlayerConfig = z
   .strictObject({
     path: z.string().min(1),
     options: z.array(z.string()),
+    probeOptions: z.array(z.string()).nullable(),
   })
   .readonly()
   .brand('external-player-config')

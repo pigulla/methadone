@@ -10,6 +10,8 @@ import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 import { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 import { Network } from '#domain/network/network.js'
 import { listenUrlsDtoSchema } from '#infrastructure/audio-addict/api/dto/listen-urls.dto.js'
+import { pingDtoSchema } from '#infrastructure/audio-addict/api/dto/ping.dto.js'
+import { qualitySuffixMapping } from '#infrastructure/audio-addict/api/quality-suffix-mapping.js'
 
 import { AUDIO_ADDICT_CONFIG, type AudioAddictConfig } from '../../config/audio-addict.config.js'
 
@@ -25,9 +27,11 @@ import { networksDtoSchema } from './dto/network.dto.js'
 
 @Injectable()
 export class AudioAddictAPI implements IAudioAddictAPI {
+  private readonly config: AudioAddictConfig
   private readonly http: Got
 
   public constructor(@Inject(AUDIO_ADDICT_CONFIG) config: AudioAddictConfig) {
+    this.config = config
     this.http = got.extend({
       cache: config.cache ? new KeyvFile() : false,
       prefixUrl: config.baseUrl,
@@ -122,9 +126,19 @@ export class AudioAddictAPI implements IAudioAddictAPI {
 
   public async getStreamURL(networkKey: NetworkKey, channel: Channel): Promise<string> {
     const response = await this.http
-      .get(`v1/${networkKey}/listen/premium/${channel.key}`)
+      .get(
+        `v1/${networkKey}/listen/premium${qualitySuffixMapping[this.config.quality]}/${channel.key}`,
+      )
       .json<JsonValue>()
 
-    return listenUrlsDtoSchema.parse(response)[0]
+    const url = listenUrlsDtoSchema.parse(response)[0]
+
+    return `${url}?${this.config.listenKey}`
+  }
+
+  public async ping(): Promise<void> {
+    const response = await this.http.get('v1/ping').json<JsonValue>()
+
+    pingDtoSchema.parse(response)
   }
 }

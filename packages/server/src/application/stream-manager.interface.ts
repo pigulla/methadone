@@ -1,6 +1,5 @@
-import { PassThrough, type Writable } from 'node:stream'
+import type { Writable } from 'node:stream'
 
-import type { AudioFormat } from '#domain/audio-format.js'
 import type { Channel } from '#domain/channel/channel.js'
 import type { Network } from '#domain/network/network.js'
 
@@ -11,10 +10,10 @@ export type StreamInformation = {
 }
 
 export abstract class IStreamManager {
-  public abstract readonly format: AudioFormat
-  public abstract readonly stream: PassThrough
+  public abstract readonly mimeType: string
 
-  public abstract start(channel: Channel, destination?: Writable): Promise<void>
+  public abstract stream(channel: Channel): Promise<void>
+  public abstract streamTo(channel: Channel, destination: Writable): Promise<void>
   public abstract stop(): void
   public abstract getInformation(): StreamInformation | null
 }
