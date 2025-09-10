@@ -19,7 +19,7 @@ import { channelFiltersDtoSchema } from './dto/channel-filter.dto.js'
 import { currentlyPlayingDtoSchema } from './dto/currently-playing.dto.js'
 import { networksDtoSchema } from './dto/network.dto.js'
 
-// For some reason, using the network id instead if its key works *sometimes* (e.g., v1/di/channels), but sometimes it
+// For some reason, using the network id instead if its key works *sometimes* (e.g., v1/1/channels), but sometimes it
 // doesn't and the API simply returns a 400 ("Invalid Network"). Not sure what's going on there so we just fall back to
 // always using the key.
 

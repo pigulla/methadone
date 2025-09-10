@@ -71,7 +71,7 @@
         "vitest:unit": "vitest run src"
     },
     "dependencies": {
-        "@electric-sql/pglite": "0.3.7",
+        "@electric-sql/pglite": "0.3.8",
         "@methadone/dto": "0.0.1",
         "@nestjs-cls/transactional": "3.1.0",
         "@nestjs/common": "11.1.6",
@@ -93,7 +93,7 @@
     },
     "devDependencies": {
         "@nestjs/testing": "11.1.6",
-        "@redocly/cli": "2.0.8",
+        "@redocly/cli": "2.1.0",
         "@types/config": "3.3.5",
         "@types/express": "5.0.3",
         "@types/supertest": "6.0.3",
