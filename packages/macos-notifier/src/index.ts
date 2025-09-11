@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noConsole: Still a WIP */
+
 import { type ChannelDTO, eventSchema, type NetworkDTO } from '@methadone/dto/'
 
 import { createEventSource, type EventSourceMessage } from 'eventsource-client'

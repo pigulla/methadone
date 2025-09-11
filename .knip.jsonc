@@ -1,6 +1,15 @@
 {
     "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
     "workspaces": {
+        "packages/cli": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["dist/**"],
+            "entry": ["src/bin/cli.ts"]
+        },
+        "packages/client": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["dist/**"]
+        },
         "packages/dto": {
             "project": ["src/**/*.ts"],
             "ignore": ["dist/**"]
@@ -20,6 +29,10 @@
                 "#module/*": ["src/module/*"],
                 "#presentation/*": ["src/presentation/*"]
             }
+        },
+        "packages/types": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["dist/**"]
         }
     },
     "ignoreDependencies": [

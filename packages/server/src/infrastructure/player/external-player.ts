@@ -21,15 +21,15 @@ export class ExternalPlayer
   implements IPlayer, OnApplicationBootstrap, OnModuleInit, OnApplicationShutdown
 {
   private readonly logger = new Logger(ExternalPlayer.name)
-  private readonly streamProvider: IStreamManager
+  private readonly streamManager: IStreamManager
   private readonly config: ExternalPlayerConfig
   private player: { readonly process: ResultPromise; abortController: AbortController } | null
 
   public constructor(
-    streamProvider: IStreamManager,
+    streamManager: IStreamManager,
     @Inject(EXTERNAL_PLAYER_CONFIG) config: ExternalPlayerConfig,
   ) {
-    this.streamProvider = streamProvider
+    this.streamManager = streamManager
     this.config = config
     this.player = null
   }
@@ -72,11 +72,12 @@ export class ExternalPlayer
 
     await new Promise<void>((resolve, _reject) => {
       const abortController = new AbortController()
+
       this.player = {
         abortController,
         process: execa(path, options, {
           cancelSignal: abortController.signal,
-          input: this.streamProvider.stream,
+          input: this.streamManager.getStream(),
           // TODO: Make stdout/stderr available for debugging?
           stdout: 'ignore',
           stderr: 'ignore',

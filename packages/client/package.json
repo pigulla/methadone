@@ -38,7 +38,7 @@
     "dependencies": {
         "@methadone/dto": "0.0.1",
         "ky": "1.10.0",
-        "zod": "4.1.5"
+        "zod": "4.1.7"
     },
     "devDependencies": {
         "type-fest": "4.41.0"

@@ -117,9 +117,9 @@ export class StreamController {
     channelKey: ChannelKey,
     @Res() response: Response,
   ): Promise<void> {
-    response.set('Content-Type', this.streamManager.mimeType)
+    response.set('Content-Type', this.streamManager.getMimeType())
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.streamManager.start(channel, response)
+    await this.streamManager.startStreamTo(channel, response)
   }
 
   @Post(':networkKey/:channelKey')
@@ -145,6 +145,6 @@ export class StreamController {
     channelKey: ChannelKey,
   ): Promise<void> {
     const channel = await this.channelService.get(networkKey, channelKey)
-    await this.streamManager.start(channel)
+    await this.streamManager.startStream(channel)
   }
 }

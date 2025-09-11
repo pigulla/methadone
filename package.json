@@ -49,7 +49,7 @@
     }
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.3",
+    "@biomejs/biome": "2.2.4",
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.13.5",
     "@tsconfig/node-ts": "23.6.1",

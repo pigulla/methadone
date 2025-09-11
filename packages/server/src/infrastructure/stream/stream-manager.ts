@@ -1,5 +1,5 @@
 import { connect, type Socket } from 'node:net'
-import { PassThrough, type Writable } from 'node:stream'
+import { PassThrough, type Readable, type Writable } from 'node:stream'
 
 import { Inject, Injectable, Logger, type OnModuleDestroy } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
@@ -22,8 +22,6 @@ import { IIcecastTransformStream } from './icecast-transform-stream.interface.js
 
 @Injectable()
 export class StreamManager implements IStreamManager, OnModuleDestroy {
-  public readonly mimeType: string
-
   private readonly logger = new Logger(StreamManager.name)
   private readonly audioAddictApi: IAudioAddictAPI
   private readonly networkRepository: INetworkRepository
@@ -46,7 +44,6 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     eventEmitter: EventEmitter2,
     moduleRef: ModuleRef,
   ) {
-    this.mimeType = getMimetypeForQuality(config.quality)
     this.networkRepository = networkRepository
     this.config = config
     this.audioAddictApi = audioAddictApi
@@ -92,11 +89,19 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
     this.eventEmitter.emit(event.name, event)
   }
 
-  public stream(channel: Channel): Promise<void> {
+  public getMimeType(): string {
+    return getMimetypeForQuality(this.config.quality)
+  }
+
+  public getStream(): Readable {
+    return this.passThroughStream
+  }
+
+  public startStream(channel: Channel): Promise<void> {
     return this.start(channel, this.passThroughStream)
   }
 
-  public streamTo(channel: Channel, stream: Writable): Promise<void> {
+  public startStreamTo(channel: Channel, stream: Writable): Promise<void> {
     return this.start(channel, stream)
   }
 
