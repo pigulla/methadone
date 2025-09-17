@@ -37,7 +37,7 @@
     },
     "dependencies": {
         "nestjs-zod": "5.0.1",
-        "zod": "4.1.7"
+        "zod": "4.1.9"
     },
     "devDependencies": {
         "@methadone/types": "0.0.1"

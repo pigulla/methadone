@@ -64,8 +64,9 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
 
     this.active.socket.unpipe()
     this.active.socket.destroy()
-
     this.active = null
+
+    this.logger.log('Stream stopped')
   }
 
   public getInformation(): StreamInformation | null {
@@ -135,7 +136,7 @@ export class StreamManager implements IStreamManager, OnModuleDestroy {
       socket,
     }
 
-    this.logger.log({ channel: channel.key, url: url.toString() }, 'Stream started')
+    this.logger.log({ channel: channel.key, networkId: channel.networkId }, 'Stream started')
     this.emit(new StreamStartedEvent({ network, channel }))
   }
 }
