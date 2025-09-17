@@ -1,4 +1,4 @@
-import { networkIdSchema, networkKeySchema } from '@methadone/types'
+import { networkIdSchema, networkKeySchema } from '@digitally-exported/types'
 
 import z from 'zod'
 

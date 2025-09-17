@@ -1,5 +1,5 @@
 {
-    "name": "@methadone/dto",
+    "name": "@digitally-exported/dto",
     "version": "0.0.1",
     "description": "The DTO part.",
     "tags": [],
@@ -40,6 +40,6 @@
         "zod": "4.1.9"
     },
     "devDependencies": {
-        "@methadone/types": "0.0.1"
+        "@digitally-exported/types": "0.0.1"
     }
 }

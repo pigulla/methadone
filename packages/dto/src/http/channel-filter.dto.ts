@@ -3,7 +3,7 @@ import {
   channelFilterKeySchema,
   channelIdSchema,
   networkIdSchema,
-} from '@methadone/types'
+} from '@digitally-exported/types'
 
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'

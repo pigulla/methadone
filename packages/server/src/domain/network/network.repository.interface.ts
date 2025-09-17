@@ -1,4 +1,4 @@
-import type { NetworkID, NetworkKey } from '@methadone/types'
+import type { NetworkID, NetworkKey } from '@digitally-exported/types'
 
 import type { Network } from '#domain/network/network.js'
 

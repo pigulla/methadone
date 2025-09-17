@@ -1,6 +1,6 @@
 import { EOL } from 'node:os'
 
-import { NetworkDTO } from '@methadone/dto'
+import { NetworkDTO } from '@digitally-exported/dto'
 
 import chalk from 'chalk'
 import type { JsonObject } from 'type-fest'

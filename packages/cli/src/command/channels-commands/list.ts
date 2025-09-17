@@ -1,7 +1,7 @@
 import { EOL } from 'node:os'
 
-import { ChannelDTO } from '@methadone/dto'
-import { asNetworkKey } from '@methadone/types'
+import { ChannelDTO } from '@digitally-exported/dto'
+import { asNetworkKey } from '@digitally-exported/types'
 
 import chalk from 'chalk'
 import type { JsonObject } from 'type-fest'

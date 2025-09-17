@@ -1,4 +1,4 @@
-import type { ChannelFilterKey, NetworkKey } from '@methadone/types'
+import type { ChannelFilterKey, NetworkKey } from '@digitally-exported/types'
 
 import { ChannelFilter } from '#domain/channel-filter/channel-filter.js'
 

@@ -1,5 +1,5 @@
 {
-    "name": "@methadone/server",
+    "name": "@digitally-exported/server",
     "version": "0.0.1",
     "description": "The server part.",
     "tags": [],
@@ -72,7 +72,7 @@
     },
     "dependencies": {
         "@electric-sql/pglite": "0.3.8",
-        "@methadone/dto": "0.0.1",
+        "@digitally-exported/dto": "0.0.1",
         "@nestjs-cls/transactional": "3.1.0",
         "@nestjs/common": "11.1.6",
         "@nestjs/core": "11.1.6",

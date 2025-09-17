@@ -1,5 +1,5 @@
 {
-    "name": "@methadone/macos-notifier",
+    "name": "@digitally-exported/macos-notifier",
     "version": "0.0.1",
     "description": "Notify on MacOS",
     "tags": [],
@@ -36,7 +36,7 @@
         "test": "npm run lint && npm run vitest && npm audit --omit dev --audit-level high"
     },
     "dependencies": {
-        "@methadone/dto": "0.0.1",
+        "@digitally-exported/dto": "0.0.1",
         "eventsource-client": "1.1.4",
         "execa": "9.6.0"
     }

@@ -1,4 +1,4 @@
-import type { ChannelFilterID, ChannelFilterKey } from '@methadone/types'
+import type { ChannelFilterID, ChannelFilterKey } from '@digitally-exported/types'
 
 import { EntityNotFoundError } from '../entity-not-found.error.js'
 

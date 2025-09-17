@@ -1,10 +1,10 @@
-import { ChannelDTO, createChannelDTO } from '@methadone/dto'
+import { ChannelDTO, createChannelDTO } from '@digitally-exported/dto'
 import {
   type ChannelKey,
   channelKeySchema,
   type NetworkKey,
   networkKeySchema,
-} from '@methadone/types'
+} from '@digitally-exported/types'
 
 import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'

@@ -1,4 +1,4 @@
-import { Client } from '@methadone/client'
+import { Client } from '@digitally-exported/client'
 
 import type { JsonValue } from 'type-fest'
 import yaml from 'yaml'

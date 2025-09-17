@@ -6,8 +6,8 @@ import {
   NetworkDTO,
   networkDtoSchema,
   networksDtoSchema,
-} from '@methadone/dto'
-import type { ChannelKey, NetworkKey } from '@methadone/types'
+} from '@digitally-exported/dto'
+import type { ChannelKey, NetworkKey } from '@digitally-exported/types'
 
 import ky, { HTTPError, type KyInstance } from 'ky'
 import type { JsonValue } from 'type-fest'

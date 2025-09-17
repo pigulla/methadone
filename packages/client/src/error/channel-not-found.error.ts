@@ -1,4 +1,4 @@
-import type { ChannelKey } from '@methadone/types'
+import type { ChannelKey } from '@digitally-exported/types'
 
 import { NotFoundError } from './not-found.error.js'
 

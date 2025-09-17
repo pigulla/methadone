@@ -1,5 +1,5 @@
 {
-    "name": "@methadone/client",
+    "name": "@digitally-exported/client",
     "version": "0.0.1",
     "description": "The API client part.",
     "tags": [],
@@ -36,7 +36,7 @@
         "test": "npm run lint && npm run vitest && npm audit --omit dev --audit-level high"
     },
     "dependencies": {
-        "@methadone/dto": "0.0.1",
+        "@digitally-exported/dto": "0.0.1",
         "ky": "1.10.0",
         "zod": "4.1.9"
     },

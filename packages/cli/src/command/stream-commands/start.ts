@@ -1,4 +1,4 @@
-import { asChannelKey, asNetworkKey } from '@methadone/types'
+import { asChannelKey, asNetworkKey } from '@digitally-exported/types'
 
 import { select } from '@inquirer/prompts'
 import type { CommandModule } from 'yargs'

@@ -9,7 +9,7 @@ import {
   createStreamStoppedDTO,
   createStreamTrackDTO,
   type Event,
-} from '@methadone/dto'
+} from '@digitally-exported/dto'
 
 import {
   Controller,

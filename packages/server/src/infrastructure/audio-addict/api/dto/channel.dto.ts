@@ -3,7 +3,7 @@ import {
   channelIdSchema,
   channelKeySchema,
   networkIdSchema,
-} from '@methadone/types'
+} from '@digitally-exported/types'
 
 import z from 'zod'
 

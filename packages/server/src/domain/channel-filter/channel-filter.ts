@@ -7,7 +7,7 @@ import {
   type ChannelFilterKey,
   type ChannelID,
   type NetworkID,
-} from '@methadone/types'
+} from '@digitally-exported/types'
 
 import type { JsonObject } from 'type-fest'
 

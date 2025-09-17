@@ -1,4 +1,4 @@
-import { channelIdSchema } from '@methadone/types'
+import { channelIdSchema } from '@digitally-exported/types'
 
 import dayjs, { type Dayjs } from 'dayjs'
 import type { Duration } from 'dayjs/plugin/duration.js'

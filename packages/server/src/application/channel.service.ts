@@ -1,4 +1,4 @@
-import type { ChannelID, ChannelKey, NetworkKey } from '@methadone/types'
+import type { ChannelID, ChannelKey, NetworkKey } from '@digitally-exported/types'
 
 import { Injectable } from '@nestjs/common'
 

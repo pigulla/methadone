@@ -1,4 +1,9 @@
-import { asNetworkID, asNetworkKey, type NetworkID, type NetworkKey } from '@methadone/types'
+import {
+  asNetworkID,
+  asNetworkKey,
+  type NetworkID,
+  type NetworkKey,
+} from '@digitally-exported/types'
 
 import type { JsonObject } from 'type-fest'
 

@@ -1,5 +1,5 @@
-import { createNetworkDTO, NetworkDTO } from '@methadone/dto'
-import { type NetworkKey, networkKeySchema } from '@methadone/types'
+import { createNetworkDTO, NetworkDTO } from '@digitally-exported/dto'
+import { type NetworkKey, networkKeySchema } from '@digitally-exported/types'
 
 import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger'

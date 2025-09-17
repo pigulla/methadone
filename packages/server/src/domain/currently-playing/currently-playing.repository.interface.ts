@@ -1,4 +1,4 @@
-import type { ChannelID, NetworkID } from '@methadone/types'
+import type { ChannelID, NetworkID } from '@digitally-exported/types'
 
 import type { CurrentlyPlaying } from '#domain/currently-playing/currently-playing.js'
 

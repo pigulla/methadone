@@ -1,10 +1,10 @@
-import { createStreamInformationDTO, StreamInformationDTO } from '@methadone/dto'
+import { createStreamInformationDTO, StreamInformationDTO } from '@digitally-exported/dto'
 import {
   type ChannelKey,
   channelKeySchema,
   type NetworkKey,
   networkKeySchema,
-} from '@methadone/types'
+} from '@digitally-exported/types'
 
 import {
   Controller,

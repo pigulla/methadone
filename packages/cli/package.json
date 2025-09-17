@@ -1,5 +1,5 @@
 {
-    "name": "@methadone/cli",
+    "name": "@digitally-exported/cli",
     "version": "0.0.1",
     "description": "Yargs-based command line application",
     "tags": [],

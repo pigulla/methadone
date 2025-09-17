@@ -1,4 +1,4 @@
-import { channelIdSchema } from '@methadone/types'
+import { channelIdSchema } from '@digitally-exported/types'
 
 import { createZodDto } from 'nestjs-zod'
 import { z } from 'zod'

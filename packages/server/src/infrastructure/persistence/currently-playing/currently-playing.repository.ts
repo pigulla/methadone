@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-import type { ChannelID, NetworkID } from '@methadone/types'
+import type { ChannelID, NetworkID } from '@digitally-exported/types'
 
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { TransactionHost } from '@nestjs-cls/transactional'

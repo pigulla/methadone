@@ -1,4 +1,8 @@
-import { channelFilterIdSchema, channelFilterKeySchema, networkIdSchema } from '@methadone/types'
+import {
+  channelFilterIdSchema,
+  channelFilterKeySchema,
+  networkIdSchema,
+} from '@digitally-exported/types'
 
 import z from 'zod'
 
