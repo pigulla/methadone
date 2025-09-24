@@ -38,9 +38,9 @@
     "dependencies": {
         "@digitally-exported/dto": "0.0.1",
         "ky": "1.10.0",
-        "zod": "4.1.9"
+        "zod": "4.1.11"
     },
     "devDependencies": {
-        "type-fest": "5.0.0"
+        "type-fest": "5.0.1"
     }
 }

@@ -37,7 +37,7 @@
     },
     "dependencies": {
         "nestjs-zod": "5.0.1",
-        "zod": "4.1.9"
+        "zod": "4.1.11"
     },
     "devDependencies": {
         "@digitally-exported/types": "0.0.1"

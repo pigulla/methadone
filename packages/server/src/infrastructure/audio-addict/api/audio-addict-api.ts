@@ -1,7 +1,7 @@
 import type { ChannelID, NetworkKey } from '@digitally-exported/types'
 
 import { Inject, Injectable } from '@nestjs/common'
-import { type Got, got, Options } from 'got'
+import { type Got, got } from 'got'
 import { KeyvFile } from 'keyv-file'
 import type { JsonValue } from 'type-fest'
 
@@ -35,17 +35,6 @@ export class AudioAddictAPI implements IAudioAddictAPI {
     this.http = got.extend({
       cache: config.cache ? new KeyvFile() : false,
       prefixUrl: config.baseUrl,
-      hooks: {
-        beforeRequest: config.cache
-          ? [
-              // There's a bug in Got that causes requests to hang indefinitely when a 304 Not Modified is returned and
-              // the content is compressed. (See: https://github.com/sindresorhus/got/issues/2410)
-              (options: Options): void => {
-                options.headers['accept-encoding'] = ''
-              },
-            ]
-          : [],
-      },
     })
   }
 
