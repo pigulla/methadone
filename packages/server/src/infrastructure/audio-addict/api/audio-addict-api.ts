@@ -1,6 +1,6 @@
 import type { ChannelID, NetworkKey } from '@digitally-exported/types'
 
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common'
 import { type Got, got } from 'got'
 import { KeyvFile } from 'keyv-file'
 import type { JsonValue } from 'type-fest'
@@ -26,7 +26,7 @@ import { networksDtoSchema } from './dto/network.dto.js'
 // always using the key.
 
 @Injectable()
-export class AudioAddictAPI implements IAudioAddictAPI {
+export class AudioAddictAPI implements IAudioAddictAPI, OnModuleInit {
   private readonly config: AudioAddictConfig
   private readonly http: Got
 
@@ -36,6 +36,13 @@ export class AudioAddictAPI implements IAudioAddictAPI {
       cache: config.cache ? new KeyvFile() : false,
       prefixUrl: config.baseUrl,
     })
+  }
+
+  // Workaround for https://github.com/sindresorhus/got/issues/2410#issuecomment-3311171020
+  public async onModuleInit(): Promise<void> {
+    const responselike = await import('responselike')
+
+    Object.defineProperty(responselike.default.prototype, 'complete', { value: true })
   }
 
   public async getCurrentlyPlaying(
