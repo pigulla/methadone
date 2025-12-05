@@ -2,7 +2,6 @@
     "name": "@digitally-exported/macos-notifier",
     "version": "0.0.1",
     "description": "Notify on MacOS",
-    "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
     },
@@ -38,6 +37,7 @@
     "dependencies": {
         "@digitally-exported/dto": "0.0.1",
         "eventsource-client": "1.2.0",
-        "execa": "9.6.0"
-    }
+        "execa": "9.6.1"
+    },
+    "tags": []
 }

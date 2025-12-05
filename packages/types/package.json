@@ -2,7 +2,6 @@
     "name": "@digitally-exported/types",
     "version": "0.0.1",
     "description": "The types client part.",
-    "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
     },
@@ -36,6 +35,7 @@
         "test": "npm run lint && npm run vitest && npm audit --omit dev --audit-level high"
     },
     "dependencies": {
-        "zod": "4.1.11"
-    }
+        "zod": "4.1.13"
+    },
+    "tags": []
 }

@@ -2,7 +2,6 @@
     "name": "@digitally-exported/dto",
     "version": "0.0.1",
     "description": "The DTO part.",
-    "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
     },
@@ -37,9 +36,10 @@
     },
     "dependencies": {
         "nestjs-zod": "5.0.1",
-        "zod": "4.1.11"
+        "zod": "4.1.13"
     },
     "devDependencies": {
         "@digitally-exported/types": "0.0.1"
-    }
+    },
+    "tags": []
 }

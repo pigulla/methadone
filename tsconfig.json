@@ -5,6 +5,9 @@
             "path": "packages/dto"
         },
         {
+            "path": "packages/dummy"
+        },
+        {
             "path": "packages/client"
         },
         {

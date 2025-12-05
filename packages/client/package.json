@@ -2,7 +2,6 @@
     "name": "@digitally-exported/client",
     "version": "0.0.1",
     "description": "The API client part.",
-    "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
     },
@@ -37,10 +36,11 @@
     },
     "dependencies": {
         "@digitally-exported/dto": "0.0.1",
-        "ky": "1.11.0",
-        "zod": "4.1.11"
+        "ky": "1.14.0",
+        "zod": "4.1.13"
     },
     "devDependencies": {
-        "type-fest": "5.0.1"
-    }
+        "type-fest": "5.3.0"
+    },
+    "tags": []
 }

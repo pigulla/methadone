@@ -2,7 +2,6 @@
     "name": "@digitally-exported/cli",
     "version": "0.0.1",
     "description": "Yargs-based command line application",
-    "tags": [],
     "bugs": {
         "url": "https://github.com/pigulla/methadone/issues"
     },
@@ -17,12 +16,12 @@
         "url": "https://de.linkedin.com/in/pigulla"
     },
     "type": "module",
-    "files": [
-        "dist"
-    ],
     "bin": {
         "meth": "dist/cli.js"
     },
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "rm -rf dist && npm run build:tsc",
         "build:tsc": "tsc --project tsconfig.build.json",
@@ -41,8 +40,9 @@
         "yargs": "17.0.1"
     },
     "devDependencies": {
-        "@types/yargs": "17.0.33",
-        "type-fest": "5.0.1",
-        "yaml": "2.8.1"
-    }
+        "@types/yargs": "17.0.35",
+        "type-fest": "5.3.0",
+        "yaml": "2.8.2"
+    },
+    "tags": []
 }
